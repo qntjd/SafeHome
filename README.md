@@ -179,108 +179,6 @@ safehome/
 | 재난문자방송 발송이력 | 행정안전부 | 실시간 알림 |
 | 뉴스 검색 | 네이버 | 안전 뉴스 |
 
----
-
-## ⚡ 실행 방법
-
-### 사전 준비
-- Docker Desktop
-- JDK 17
-- Node.js 20+
-- Python 3.10+
-
-### 1. 환경변수 설정
-
-`safehome-api/src/main/resources/application.yml`
-
-```yaml
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: YOUR_GOOGLE_CLIENT_ID
-            client-secret: YOUR_GOOGLE_CLIENT_SECRET
-```
-
-`safehome-batch/.env`
-
-```env
-PUBLIC_API_KEY=공공데이터포털_인증키
-KAKAO_REST_API_KEY=카카오_REST_API_키
-NAVER_CLIENT_ID=네이버_클라이언트_ID
-NAVER_CLIENT_SECRET=네이버_클라이언트_시크릿
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=safehome
-DB_USER=safehome
-DB_PASSWORD=safehome1234
-```
-
-`safehome-web/index.html`
-
-```html
-<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=카카오_JavaScript_키&libraries=services"></script>
-```
-
-### 2. Docker 실행 (DB + Redis)
-
-```bash
-docker-compose up -d
-```
-
-### 3. 공공데이터 수집
-
-```bash
-cd safehome-batch
-pip install -r requirements.txt
-python main.py
-```
-
-### 4. 백엔드 실행
-
-```bash
-cd safehome-api
-gradlew bootRun
-```
-
-### 5. 프론트엔드 실행
-
-```bash
-cd safehome-web
-npm install
-npm run dev
-```
-
-### 6. 접속
-
-| 서비스 | URL |
-|---|---|
-| 웹 앱 | http://localhost:5173 |
-| Swagger | http://localhost:8080/swagger-ui.html |
-
----
-
-## 📡 API 문서
-
-백엔드 실행 후 Swagger UI에서 전체 API 명세를 확인할 수 있어요.
-
-```
-http://localhost:8080/swagger-ui.html
-```
-
-| 도메인 | 엔드포인트 | 설명 |
-|---|---|---|
-| Auth | `/api/auth/**` | 회원가입·로그인·토큰 갱신 |
-| Safety | `/api/safety/**` | 안전시설·안전점수·히트맵 |
-| Trip | `/api/trips/**` | 안심귀가·SOS |
-| Alert | `/api/alerts/**` | 알림구독·SSE |
-| Crime | `/api/crime/**` | 범죄통계 |
-| News | `/api/news/**` | 안전뉴스 |
-| Contact | `/api/contacts/**` | 비상연락처 |
-
----
 
 ## 📊 ERD
 
@@ -293,23 +191,8 @@ SAFETY_FACILITIES ──────── DISTRICT_SCORES
 CRIME_STATS ────────────── DISTRICT_SCORES
 NEWS_ARTICLES
 DISASTER_ALERTS
-```
-
----
-
-## 👤 개발자
-
-| 항목 | 내용 |
-|---|---|
-| 개발 기간 | 2026년 |
-| 개발 인원 | 1인 |
-| 개발 환경 | Windows 11 / VSCode / IntelliJ |
-
----
 
 ## 📄 라이선스
-
-본 프로젝트는 포트폴리오 목적으로 제작되었습니다.
 공공데이터는 공공데이터포털 이용약관에 따라 활용되었습니다.
 
 ---
