@@ -1,28 +1,23 @@
-# 🏠 SafeHome — 1인 가구 안심 생활 플랫폼
+# 🏠 SafeHome — 안심 생활 플랫폼
 
-> 공공데이터를 활용해 1인 가구의 안전한 일상을 지원하는 종합 안전 플랫폼
+> 공공데이터를 활용해 안전한 일상을 지원하는 종합 안전 플랫폼
 
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-green?style=flat-square&logo=springboot)
 ![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=flat-square&logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-7-red?style=flat-square&logo=redis)
 ![Python](https://img.shields.io/badge/Python-3.10-yellow?style=flat-square&logo=python)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=flat-square&logo=docker)
 
 ---
 
 ## 📌 프로젝트 소개
+최근 들어 범죄가 많아지는 양상에 따라 만들고 있는 프로젝트입니다.
+SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 안전한 생활을 지원하는 플랫폼입니다.
 
-SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 가구의 안전한 생활을 지원하는 플랫폼입니다.
-
-- **주변 안전시설(CCTV·비상벨·경찰서)** 지도 시각화
-- **동네 안전점수** 자동 산출 및 등급 제공
-- **안심 귀가** — 목적지 설정 → 미도착 시 비상연락처 자동 알림 (워치독 패턴)
-- **실시간 재난·범죄 알림** (SSE 스트림)
-- **지역별 범죄통계** 차트·테이블 시각화
-- **안전 뉴스** 자동 수집 (네이버 검색 API)
-- **개인정보 보호 자원** 안내 (공공기관 연계)
+귀갓길부터 집 안까지 안심할 수 있도록 실시간 안전정보, 안심 귀가, 긴급 SOS 기능을 제공합니다.
 
 ---
 
@@ -31,12 +26,12 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 ```
 ┌─────────────────────────────────────────────────────┐
 │                     Client                          │
-│         React (Web)  │  Android App                 │
+│         React Web  │  Android App (예정)            │
 └──────────────────────┼──────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
 │              Spring Boot API Server                 │
-│  JWT 인증 │ 안전점수 엔진 │ 워치독 │ SSE │ OAuth2   │
+│  JWT·OAuth2 │ 안전점수 엔진 │ 워치독 │ SSE          │
 └──────────────────────┼──────────────────────────────┘
                        │
         ┌──────────────┴──────────────┐
@@ -57,20 +52,29 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 ## 🚀 주요 기능
 
 ### 🗺 안전 지도
-- 반경 내 CCTV·비상벨·경찰서·파출소 마커 표시
+- 전국 CCTV(35,000+건) · 비상벨(8,700+건) · 경찰서·파출소(60건) 마커 표시
 - 시설 종류별 필터링 (토글 버튼)
-- 행정동 단위 안전점수 사이드바
+- 현재 위치 기반 내 동네 안전점수 자동 표시
+- 안전점수 · 범죄통계 탭 전환
 
 ### 📊 동네 안전점수
 - CCTV 밀도 (30%) + 범죄 역점수 (40%) + 비상벨 밀도 (10%) + 가로등 (20%) 가중 합산
 - A~F 등급 자동 부여
-- Spring Scheduler로 매일 새벽 4시 자동 재계산
+- 대구 구/군 단위 정밀 분석, 전국 시도 단위 확장
+- Spring Scheduler 매일 새벽 4시 자동 재계산
+- Redis 캐싱으로 응답 성능 최적화
 
 ### 🚶 안심 귀가 (워치독 패턴)
-- 카카오맵 주소 검색·지도 클릭으로 목적지 설정
-- 예상 소요 시간 슬라이더 설정
+- 카카오맵 주소 검색 · 지도 클릭으로 목적지 설정
 - 예상 도착 시각 초과 시 비상연락처에 자동 알림
 - SOS 버튼 — 비상연락처 즉시 알림
+
+### 🚨 긴급 SOS + 음성 감지
+- **수동 SOS** — 버튼 클릭으로 즉시 활성화
+- **음성 자동 감지** — "살려줘", "도와줘" 등 키워드 감지 시 자동 SOS 발동
+- 5초 카운트다운 후 비상연락처 자동 알림
+- 112 신고 전화 앱 연결
+- 현재 위치 카카오맵 링크 복사
 
 ### 🔔 실시간 알림 (SSE)
 - Server-Sent Events 기반 실시간 재난문자 수신
@@ -81,10 +85,21 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 - 지역별 범죄 건수 스택 바 차트 (Recharts)
 - 범죄 유형별 레이더 차트
 - 강력범죄·폭행·절도·사기·풍속·기타 6개 분류
+- 지역별 상세 테이블
 
 ### 📰 안전 뉴스
 - 네이버 검색 API로 대구 안전·재난·범죄 뉴스 1시간 주기 자동 수집
 - 카테고리 필터·키워드 검색·페이지네이션
+
+### 🛡 안전 자원
+- 명의도용방지, 금융거래 조회, 개인정보 포털 등 공공 안전 서비스 연계
+- 여성·1인 가구 특화 서비스 안내
+
+### 👤 계정 및 설정
+- 이메일/비밀번호 로그인 + 구글 OAuth2 소셜 로그인
+- 비상연락처 CRUD (최대 5명)
+- 재난·범죄 알림 구독 설정
+- 닉네임 변경, 집 위치 저장
 
 ---
 
@@ -97,7 +112,7 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 | Spring Boot | 4.0 | API 서버 |
 | Spring Security | 6.x | JWT 인증·OAuth2 |
 | Spring Data JPA | 3.x | ORM |
-| Spring Scheduler | - | 워치독·점수 재계산 |
+| Spring Scheduler | - | 워치독·점수 재계산·배치 |
 | PostgreSQL | 16 | 주 데이터베이스 |
 | Redis | 7 | 캐시 |
 | Springdoc OpenAPI | 3.x | Swagger 문서화 |
@@ -114,6 +129,7 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 | Recharts | - | 차트 시각화 |
 | Tailwind CSS | 4.x | 스타일링 |
 | React Hook Form | 7.x | 폼 관리 |
+| Web Speech API | - | 음성 감지 (SOS) |
 
 ### 데이터 수집 (Python)
 | 기술 | 용도 |
@@ -127,7 +143,10 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 | 기술 | 용도 |
 |---|---|
 | Docker Compose | 로컬 개발 환경 |
+| Kakao Maps API | 지도·주소 검색·역지오코딩 |
 | Kakao REST API | 주소→좌표 변환 |
+| Naver Search API | 뉴스 수집 |
+| Google OAuth2 | 소셜 로그인 |
 
 ---
 
@@ -144,14 +163,14 @@ safehome/
 │       │   ├── alert/           # 알림구독·SSE
 │       │   └── news/            # 뉴스
 │       ├── global/              # JWT·예외처리·공통응답
-│       ├── config/              # Security·OAuth2
+│       ├── config/              # Security·OAuth2·Redis
 │       └── batch/               # 안전점수 자동 재계산
 │
 ├── safehome-web/                # React 프론트엔드
 │   └── src/
 │       ├── api/                 # Axios API 클라이언트
-│       ├── components/          # 공통 컴포넌트
-│       ├── hooks/               # 커스텀 훅
+│       ├── components/          # 공통 컴포넌트 (SOS, Footer 등)
+│       ├── hooks/               # 커스텀 훅 (음성감지, 위치 등)
 │       ├── pages/               # 페이지 컴포넌트
 │       ├── store/               # Zustand 전역 상태
 │       └── types/               # TypeScript 타입
@@ -169,30 +188,150 @@ safehome/
 
 ## 🗃 활용 공공데이터
 
-| 데이터 | 제공기관 | 활용 |
-|---|---|---|
-| CCTV 정보 조회 | 행정안전부 | 안전 지도 마커 |
-| 안전비상벨 위치정보 | 행정안전부 | 안전 지도 마커 |
-| 전국 지구대·파출소 주소 | 경찰청 | 안전 지도 마커 |
-| 범죄 발생 지역별 통계 | 경찰청 | 범죄통계 차트 |
-| 범죄통계정보 | 한국형사법무정책연구원 | 안전점수 계산 |
-| 재난문자방송 발송이력 | 행정안전부 | 실시간 알림 |
-| 뉴스 검색 | 네이버 | 안전 뉴스 |
+| 데이터 | 제공기관 | 건수 | 활용 |
+|---|---|---|---|
+| CCTV 정보 조회 | 행정안전부 | 35,000+ | 안전 지도 마커 |
+| 안전비상벨 위치정보 | 행정안전부 | 8,700+ | 안전 지도 마커 |
+| 전국 지구대·파출소 주소 | 경찰청 | 60+ | 안전 지도 마커 |
+| 범죄 발생 지역별 통계 | 경찰청 | 전국 | 범죄통계 차트 |
+| 범죄통계정보 | 한국형사법무정책연구원 | 전국 | 안전점수 계산 |
+| 재난문자방송 발송이력 | 행정안전부 | 실시간 | 실시간 알림 |
+| 뉴스 검색 | 네이버 | 실시간 | 안전 뉴스 |
 
+---
 
-## 📊 ERD
+## ⚡ 실행 방법
 
+### 사전 준비
+- Docker Desktop
+- JDK 17
+- Node.js 20+
+- Python 3.10+
+
+### 1. 환경변수 설정
+
+`safehome-api/.env`
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=safehome
+DB_USERNAME=safehome
+DB_PASSWORD=your_password
+REDIS_HOST=localhost
+REDIS_PORT=6379
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+JWT_SECRET=your_jwt_secret_key_32chars_minimum
+DISASTER_API_KEY=your_disaster_api_key
 ```
-USERS ──────────────────┬── SAFE_TRIPS
-  │                     └── EMERGENCY_CONTACTS
-  └── ALERT_SUBSCRIPTIONS
 
-SAFETY_FACILITIES ──────── DISTRICT_SCORES
-CRIME_STATS ────────────── DISTRICT_SCORES
-NEWS_ARTICLES
-DISASTER_ALERTS
+`safehome-batch/.env`
+```env
+PUBLIC_API_KEY=공공데이터포털_인증키
+KAKAO_REST_API_KEY=카카오_REST_API_키
+NAVER_CLIENT_ID=네이버_클라이언트_ID
+NAVER_CLIENT_SECRET=네이버_클라이언트_시크릿
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=safehome
+DB_USER=safehome
+DB_PASSWORD=your_password
+```
+
+`safehome-web/index.html`
+```html
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=카카오_JavaScript_키&libraries=services"></script>
+```
+
+### 2. Docker 실행 (DB + Redis)
+```bash
+docker-compose up -d
+```
+
+### 3. 공공데이터 수집
+```bash
+cd safehome-batch
+pip install -r requirements.txt
+python main.py
+```
+
+### 4. 백엔드 실행
+```bash
+cd safehome-api
+gradlew bootRun
+```
+
+### 5. 프론트엔드 실행
+```bash
+cd safehome-web
+npm install
+npm run dev
+```
+
+### 6. 접속
+
+| 서비스 | URL |
+|---|---|
+| 웹 앱 | http://localhost:5173 |
+| Swagger | http://localhost:8080/swagger-ui.html |
+
+---
+
+## 📡 API 문서
+
+백엔드 실행 후 Swagger UI에서 전체 API 명세를 확인할 수 있어요.
+
+| 도메인 | 엔드포인트 | 설명 |
+|---|---|---|
+| Auth | `/api/auth/**` | 회원가입·로그인·토큰 갱신 |
+| Safety | `/api/safety/**` | 안전시설·안전점수·히트맵 |
+| Trip | `/api/trips/**` | 안심귀가·SOS |
+| Alert | `/api/alerts/**` | 알림구독·SSE |
+| Crime | `/api/crime/**` | 범죄통계 |
+| News | `/api/news/**` | 안전뉴스 |
+| Contact | `/api/contacts/**` | 비상연락처 |
+| User | `/api/users/**` | 프로필 관리 |
+
+---
+
+## 📱 페이지 구성
+
+| 페이지 | 경로 | 설명 |
+|---|---|---|
+| 홈 (대시보드) | `/` | 안전 현황 요약·빠른 메뉴 |
+| 안전 지도 | `/map` | CCTV·비상벨·경찰서 지도 |
+| 안심 귀가 | `/trip` | 귀가 시작·도착·SOS |
+| 안전 뉴스 | `/news` | 지역 안전 뉴스 |
+| 범죄 통계 | `/crime` | 범죄 차트·테이블 |
+| 안전 자원 | `/resources` | 공공 안전 서비스 연계 |
+| 설정 | `/settings` | 비상연락처·알림 구독 |
+
+---
+
+## 👤 개발 정보
+
+| 항목 | 내용 |
+|---|---|
+| 개발 기간 | 2026년 |
+| 개발 인원 | 1인 |
+| 개발 환경 | Windows 11 / VSCode / IntelliJ |
+| 대상 사용자 | 1인 가구 (특히 여성·청년) |
+
+---
+
+## 🗺 향후 로드맵
+
+- [ ] Android 앱 — 백그라운드 음성 감지·잠금화면 SOS
+- [ ] 전국 시군구 단위 안전점수 확장
+- [ ] 사용자 위험 제보 게시판
+- [ ] 안전 경로 추천 (안전시설 가중 최적 경로)
+- [ ] FCM 푸시 알림 실제 연동
+
+---
 
 ## 📄 라이선스
+
+
 공공데이터는 공공데이터포털 이용약관에 따라 활용되었습니다.
 
 ---
