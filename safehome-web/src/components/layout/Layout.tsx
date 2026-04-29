@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useSse } from '@/hooks/useSse'
 import AlertToast from '@/components/alert/AlertToast'
 import type { AlertEvent } from '@/types'
+import SosOverlay from '@/components/SosOverlay'
 
 export default function Layout() {
   const { pathname } = useLocation()
@@ -24,6 +25,7 @@ export default function Layout() {
       <main className={`flex-1 ${isMapPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         <Outlet />
       </main>
+      <SosOverlay /> 
       <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50 max-w-xs w-full">
         {alerts.map((alert, i) => (
           <AlertToast key={i} alert={alert} />

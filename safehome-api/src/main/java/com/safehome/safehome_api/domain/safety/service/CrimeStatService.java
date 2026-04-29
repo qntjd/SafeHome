@@ -4,6 +4,8 @@ import com.safehome.safehome_api.domain.safety.dto.CrimeStatDto;
 import com.safehome.safehome_api.domain.safety.entity.CrimeStat;
 import com.safehome.safehome_api.domain.safety.repository.CrimeStatRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ public class CrimeStatService {
         "OTHER",   "기타"
     );
 
+    @Cacheable(value = "crimes", key = "'all'")
     @Transactional(readOnly = true)
     public CrimeStatDto.AllDistrictCrimeResponse getAllDistrictCrimes() {
         List<CrimeStat> stats = crimeStatRepository.findAllByYear(2024);
