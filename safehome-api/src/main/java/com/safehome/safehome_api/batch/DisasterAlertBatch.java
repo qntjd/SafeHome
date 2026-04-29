@@ -66,18 +66,38 @@ public class DisasterAlertBatch {
 
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> callDisasterApi() {
-        // 실제 행안부 API 응답 파싱 (공공데이터포털 키 필요)
-        // 개발 중에는 Mock 데이터 반환
-        return List.of(
-                Map.of(
-                        "SN", "TEST-" + System.currentTimeMillis(),
-                        "MSG_CN", "[테스트] 강풍 주의보가 발령되었습니다.",
-                        "RCPTN_RGN_NM", "대구광역시"
-                )
-        );
+        try {
+            String url = disasterApiUrl
+                    + "?serviceKey=" + apiKey
+                    + "&pageNo=1"
+                    + "&numOfRows=20"
+                    + "&returnType=json";
+
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response == null) return List.of();
+
+            // 응답 구조: response.body.items.item
+            Map<String, Object> body = (Map<String, Object>) response.get("body");
+            if (body == null) return List.of();
+
+            Map<String, Object> items = (Map<String, Object>) body.get("items");
+            if (items == null) return List.of();
+
+            Object item = items.get("item");
+            if (item instanceof List) {
+                return (List<Map<String, Object>>) item;
+            } else if (item instanceof Map) {
+                return List.of((Map<String, Object>) item);
+            }
+
+        } catch (Exception e) {
+            log.error("[DisasterBatch] API 호출 실패: {}", e.getMessage());
+        }
+        return List.of();
     }
 
     private void notifySubscribers(DisasterAlert alert) {
+        String districtName = alert.getDistrictName();
         if (alert.getLat() == null || alert.getLng() == null) {
             // 좌표 없으면 전체 브로드캐스트
             sseEmitterManager.broadcast(Map.of(
@@ -92,15 +112,15 @@ public class DisasterAlertBatch {
 
         // 좌표 있으면 반경 내 구독자에게만 전송
         subscriptionRepository
-                .findActiveSubscriptionsNear(alert.getLat(), alert.getLng())
-                .forEach(sub -> sseEmitterManager.send(
-                        sub.getUser().getId(),
-                        Map.of(
-                                "type", "DISASTER",
-                                "message", alert.getMessage(),
-                                "district", alert.getDistrictName(),
-                                "level", alert.getLevel().name()
-                        )
-                ));
+            .findActiveSubscriptionsByDistrict(districtName)
+            .forEach(sub -> sseEmitterManager.send(
+                    sub.getUser().getId(),
+                    Map.of(
+                            "type",     "DISASTER",
+                            "message",  alert.getMessage(),
+                            "district", alert.getDistrictName(),
+                            "level",    alert.getLevel().name()
+                    )
+            ));
     }
 }

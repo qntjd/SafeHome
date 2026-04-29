@@ -24,7 +24,6 @@ public class AlertService {
     private final UserRepository userRepository;
     private final SseEmitterManager sseEmitterManager;
 
-    // SSE 연결 등록
     public SseEmitter connectSse(String email) {
         User user = findUser(email);
         return sseEmitterManager.add(user.getId());
@@ -34,12 +33,19 @@ public class AlertService {
     public AlertDto.SubscriptionResponse subscribe(String email, AlertDto.SubscribeRequest req) {
         User user = findUser(email);
 
+        // 중복 체크
+        if (subscriptionRepository.existsByUserIdAndSidoNameAndSigunguNameAndIsActiveTrue(
+                user.getId(), req.sidoName(), req.sigunguName())) {
+            throw new IllegalArgumentException("이미 구독 중인 지역입니다.");
+        }
+
         AlertSubscription subscription = AlertSubscription.builder()
                 .user(user)
                 .alertType(req.alertType())
-                .centerLat(req.centerLat())
-                .centerLng(req.centerLng())
-                .radiusKm(req.radiusKm() != null ? req.radiusKm() : 3.0)
+                .sidoName(req.sidoName())
+                .sigunguName(req.sigunguName())
+                .label(req.label())
+                .isMyLocation(req.isMyLocation() != null && req.isMyLocation())
                 .build();
 
         return AlertDto.SubscriptionResponse.from(subscriptionRepository.save(subscription));
@@ -54,7 +60,6 @@ public class AlertService {
         if (!sub.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("접근 권한이 없습니다.");
         }
-
         sub.deactivate();
     }
 
@@ -71,6 +76,26 @@ public class AlertService {
     public List<AlertDto.AlertHistoryResponse> getAlertHistory() {
         return alertRepository.findTop20ByOrderByIssuedAtDesc()
                 .stream()
+                .map(AlertDto.AlertHistoryResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AlertDto.AlertHistoryResponse> getMyLocationAlerts(String email) {
+        User user = findUser(email);
+        // 내 지역 구독 목록 가져와서 해당 지역 알림만 필터링
+        List<AlertSubscription> myLocSubs = subscriptionRepository
+                .findAllByUserIdAndIsActiveTrue(user.getId())
+                .stream()
+                .filter(AlertSubscription::getIsMyLocation)
+                .toList();
+
+        if (myLocSubs.isEmpty()) return List.of();
+
+        String sido = myLocSubs.get(0).getSidoName();
+        return alertRepository.findTop20ByOrderByIssuedAtDesc()
+                .stream()
+                .filter(a -> a.getDistrictName() != null && a.getDistrictName().contains(sido))
                 .map(AlertDto.AlertHistoryResponse::from)
                 .toList();
     }

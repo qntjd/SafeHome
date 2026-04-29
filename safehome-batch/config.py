@@ -29,13 +29,7 @@ NAVER_CLIENT_ID     = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 NAVER_NEWS_API_URL  = "https://openapi.naver.com/v1/search/news.json"
 
-NEWS_KEYWORDS = [
-    "대구 범죄",
-    "대구 재난",
-    "대구 안전사고",
-    "대구 화재",
-    "대구 교통사고",
-]
+
 
 # API 엔드포인트
 CCTV_API_URL        = "https://apis.data.go.kr/1741000/cctv_info/info"

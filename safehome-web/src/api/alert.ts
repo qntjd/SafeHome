@@ -2,17 +2,20 @@ import api from './axios'
 
 export interface SubscribeRequest {
   alertType: 'DISASTER' | 'CRIME' | 'ALL'
-  centerLat: number
-  centerLng: number
-  radiusKm: number
+  sidoName: string
+  sigunguName?: string
+  label?: string
+  isMyLocation?: boolean
 }
 
 export interface SubscriptionResponse {
   id: string
   alertType: string
-  centerLat: number
-  centerLng: number
-  radiusKm: number
+  sidoName: string
+  sigunguName?: string
+  label?: string
+  displayName: string
+  isMyLocation: boolean
   isActive: boolean
 }
 
@@ -34,6 +37,9 @@ export const alertApi = {
 
   getHistory: () =>
     api.get<{ data: AlertHistoryResponse[] }>('/alerts/history'),
+
+  getMyLocationHistory: () =>
+    api.get<{ data: AlertHistoryResponse[] }>('/alerts/history/my'),  // 추가
 
   unsubscribe: (id: string) =>
     api.delete(`/alerts/subscribe/${id}`),

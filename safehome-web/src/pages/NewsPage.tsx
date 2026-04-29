@@ -6,10 +6,11 @@ import Footer from '@/components/Footer'
 
 const KEYWORD_TABS = [
   { label: '전체',    value: '' },
-  { label: '범죄',    value: '범죄' },
+  { label: '범죄',    value: '검거' },
   { label: '재난',    value: '재난' },
   { label: '화재',    value: '화재' },
   { label: '교통사고', value: '교통사고' },
+  { label: '안전사고', value: '사고' },
 ]
 
 const KEYWORD_COLORS: Record<string, string> = {

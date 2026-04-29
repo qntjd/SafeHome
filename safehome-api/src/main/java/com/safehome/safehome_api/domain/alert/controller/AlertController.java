@@ -26,9 +26,7 @@ public class AlertController {
 
     @Operation(summary = "SSE 실시간 알림 연결")
     @GetMapping(value = "/live", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter connectLive(
-            @AuthenticationPrincipal UserDetails user
-    ) {
+    public SseEmitter connectLive(@AuthenticationPrincipal UserDetails user) {
         return alertService.connectSse(user.getUsername());
     }
 
@@ -59,9 +57,17 @@ public class AlertController {
         return ApiResponse.success(alertService.getMySubscriptions(user.getUsername()));
     }
 
-    @Operation(summary = "최근 재난알림 이력 조회 (최대 20건)")
+    @Operation(summary = "전체 알림 이력 조회")
     @GetMapping("/history")
     public ApiResponse<List<AlertDto.AlertHistoryResponse>> getHistory() {
         return ApiResponse.success(alertService.getAlertHistory());
+    }
+
+    @Operation(summary = "내 지역 알림 이력 조회")
+    @GetMapping("/history/my")
+    public ApiResponse<List<AlertDto.AlertHistoryResponse>> getMyHistory(
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        return ApiResponse.success(alertService.getMyLocationAlerts(user.getUsername()));
     }
 }
