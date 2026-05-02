@@ -10,6 +10,29 @@ import java.util.List;
 
 public class SafetyDto {
 
+    public record SafeRouteResponse(
+        List<RoutePoint> safePoints,  
+        int totalCctv,
+        int totalBell,
+        int totalPolice,
+        double safetyScore
+    ) {}
+
+    public record RoutePoint(
+            Double lat,
+            Double lng,
+            String type,
+            String districtName
+    ) {}
+
+    public record NearbyDangerResponse(
+        int cctvCount,
+        int bellCount,
+        int policeCount,
+        String dangerLevel,  
+        String message
+    ) {}
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record FacilityResponse(
             String type,

@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/api/news/**",
                                 "/login/oauth2/**",
                                 "/oauth2/**",
-                                "/api/crime/**"
+                                "/api/crime/**",
+                                "/api/trips/share/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

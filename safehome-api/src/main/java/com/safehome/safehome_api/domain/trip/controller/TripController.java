@@ -57,4 +57,12 @@ public class TripController {
         tripService.cancelTrip(user.getUsername(), tripId);
         return ApiResponse.success(null);
     }
+
+    @Operation(summary = "공유 링크로 위치 조회")
+    @GetMapping("/share/{shareToken}")
+    public ApiResponse<TripDto.ShareLocationResponse> getSharedLocation(
+            @PathVariable String shareToken
+    ) {
+        return ApiResponse.success(tripService.getSharedLocation(shareToken));
+    }
 }

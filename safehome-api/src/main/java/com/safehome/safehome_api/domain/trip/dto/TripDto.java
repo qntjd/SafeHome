@@ -9,6 +9,21 @@ import java.util.UUID;
 
 public class TripDto {
 
+    public record ShareResponse(
+        String shareUrl,
+        String shareToken
+    ) {}
+
+    public record ShareLocationResponse(
+        Double currentLat,
+        Double currentLng,
+        Double endLat,
+        Double endLng,
+        String status,
+        String nickname,
+        String expectedArrivalAt
+    ) {}
+
     public record StartRequest(
             @NotNull Double startLat,
             @NotNull Double startLng,
@@ -26,7 +41,8 @@ public class TripDto {
             LocalDateTime departureAt,
             LocalDateTime expectedArrivalAt,
             LocalDateTime arrivedAt,
-            String status
+            String status,
+            String shareToken
     ) {
         public static TripResponse from(SafeTrip t) {
             return new TripResponse(
@@ -36,8 +52,11 @@ public class TripDto {
                     t.getDepartureAt(),
                     t.getExpectedArrivalAt(),
                     t.getArrivedAt(),
-                    t.getStatus().name()
+                    t.getStatus().name(),
+                    t.getShareToken()
             );
         }
     }
+
+    
 }

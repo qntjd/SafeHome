@@ -44,6 +44,7 @@ public class TripService {
                 .expectedArrivalAt(now.plusMinutes(req.estimatedMinutes()))
                 .build();
 
+        trip.generateShareToken();
         return TripDto.TripResponse.from(tripRepository.save(trip));
     }
 
@@ -93,5 +94,21 @@ public class TripService {
             throw new IllegalArgumentException("접근 권한이 없습니다.");
         }
         return trip;
+    }
+
+    @Transactional(readOnly = true)
+    public TripDto.ShareLocationResponse getSharedLocation(String shareToken) {
+        SafeTrip trip = tripRepository.findByShareToken(shareToken)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 공유 링크입니다."));
+
+        return new TripDto.ShareLocationResponse(
+                trip.getStartLat(),
+                trip.getStartLng(),
+                trip.getEndLat(),
+                trip.getEndLng(),
+                trip.getStatus().name(),
+                trip.getUser().getNickname(),
+                trip.getExpectedArrivalAt().toString()
+        );
     }
 }

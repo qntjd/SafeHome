@@ -55,6 +55,13 @@ public class SafeTrip {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(unique = true)
+    private String shareToken;
+
+    public void generateShareToken() {
+        this.shareToken = java.util.UUID.randomUUID().toString().replace("-", "");
+    }
+
     public void arrive() {
         this.arrivedAt = LocalDateTime.now();
         this.status = TripStatus.ARRIVED;
@@ -74,9 +81,9 @@ public class SafeTrip {
     }
 
     public enum TripStatus {
-        IN_PROGRESS,  // 귀가 중
-        ARRIVED,      // 도착 완료
-        SOS,          // SOS 발동
-        CANCELLED     // 취소
+        IN_PROGRESS,  
+        ARRIVED,      
+        SOS,          
+        CANCELLED     
     }
 }

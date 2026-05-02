@@ -41,4 +41,24 @@ public class SafetyController {
     public ApiResponse<SafetyDto.HeatmapResponse> getHeatmap() {
         return ApiResponse.success(safetyService.getHeatmap());
     }
+
+    @Operation(summary = "안전 경로 추천")
+    @GetMapping("/safe-route")
+    public ApiResponse<SafetyDto.SafeRouteResponse> getSafeRoute(
+            @RequestParam double startLat,
+            @RequestParam double startLng,
+            @RequestParam double endLat,
+            @RequestParam double endLng
+    ) {
+        return ApiResponse.success(safetyService.getSafeRoute(startLat, startLng, endLat, endLng));
+    }
+
+    @Operation(summary = "주변 범죄 위험도 조회")
+    @GetMapping("/nearby-danger")
+    public ApiResponse<SafetyDto.NearbyDangerResponse> getNearbyDanger(
+            @RequestParam double lat,
+            @RequestParam double lng
+    ) {
+        return ApiResponse.success(safetyService.getNearbyDanger(lat, lng));
+    }
 }

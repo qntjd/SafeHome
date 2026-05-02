@@ -13,6 +13,7 @@ import OAuthCallbackPage from '@/pages/OAuthCallbackPage'
 import SettingsPage from '@/pages/SettingsPage'
 import CrimeStatsPage from '@/pages/CrimeStatsPage'
 import SafetyResourcesPage from './pages/SafetyResourcesPage'
+import ShareLocationPage from './pages/ShareLocationPage'
 
 const queryClient = new QueryClient()
 
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+          <Route path="/share/:shareToken" element={<ShareLocationPage />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/"      element={<DashboardPage />} />

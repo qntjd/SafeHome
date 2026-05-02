@@ -18,6 +18,17 @@ export interface TripResponse {
   expectedArrivalAt: string
   arrivedAt: string | null
   status: 'IN_PROGRESS' | 'ARRIVED' | 'SOS' | 'CANCELLED'
+  shareToken: string | null
+}
+
+export interface ShareLocationResponse {
+  currentLat: number
+  currentLng: number
+  endLat: number
+  endLng: number
+  status: string
+  nickname: string
+  expectedArrivalAt: string
 }
 
 export const tripApi = {
@@ -32,4 +43,7 @@ export const tripApi = {
 
   cancel: (tripId: string) =>
     api.delete(`/trips/${tripId}`),
+
+  getSharedLocation: (shareToken: string) =>
+  api.get<{ data: ShareLocationResponse }>(`/trips/share/${shareToken}`),
 }
