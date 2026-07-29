@@ -50,6 +50,14 @@ public class AlertSubscription {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Category category = Category.OTHER;
+
+    public enum Category {
+        FAMILY, FRIEND, OTHER
+    }
+
     public void deactivate() {
         this.isActive = false;
     }

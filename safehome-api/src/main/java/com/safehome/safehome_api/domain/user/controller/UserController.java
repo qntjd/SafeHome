@@ -1,12 +1,15 @@
 package com.safehome.safehome_api.domain.user.controller;
 
 import com.safehome.safehome_api.domain.user.dto.AuthDto;
+import com.safehome.safehome_api.domain.user.service.EmailVerificationService;
 import com.safehome.safehome_api.domain.user.service.UserService;
 import com.safehome.safehome_api.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final EmailVerificationService emailVerificationService;
 
     @Operation(summary = "회원가입")
     @PostMapping("/register")
@@ -53,5 +57,33 @@ public class UserController {
             @AuthenticationPrincipal UserDetails user
     ) {
         return ApiResponse.success(userService.getMe(user.getUsername()));
+    }
+
+    @Operation(summary = "구글 토큰 로그인 (Android)")
+    @PostMapping("/google/token")
+    public ApiResponse<AuthDto.TokenResponse> googleTokenLogin(
+            @RequestBody Map<String, String> body
+    ) {
+        String idToken = body.get("idToken");
+        if (idToken == null || idToken.isBlank()) {
+            throw new IllegalArgumentException("idToken이 필요합니다.");
+        }
+        return ApiResponse.success(userService.loginWithGoogleToken(idToken));
+    }
+
+    @Operation(summary = "이메일 인증 코드 발송")
+    @PostMapping("/email/send")
+    public ApiResponse<Void> sendVerificationCode(@RequestBody Map<String, String> body) {
+        emailVerificationService.sendVerificationCode(body.get("email"));
+        return ApiResponse.success(null);
+    }
+
+    @Operation(summary = "이메일 인증 코드 검증")
+    @PostMapping("/email/verify")
+    public ApiResponse<Boolean> verifyCode(@RequestBody Map<String, String> body) {
+        boolean result = emailVerificationService.verifyCode(
+            body.get("email"), body.get("code")
+        );
+        return ApiResponse.success(result);
     }
 }

@@ -105,7 +105,7 @@ export default function NewsPage() {
         {/* 헤더 */}
         <div className="mb-6">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1">안전 뉴스</h1>
-          <p className="text-sm text-gray-400">대구 지역 안전·재난·범죄 관련 최신 뉴스</p>
+          <p className="text-sm text-gray-400">전국 지역 안전·재난·범죄 관련 최신 뉴스</p>
         </div>
 
         {/* 검색창 */}

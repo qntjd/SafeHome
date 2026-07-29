@@ -46,6 +46,8 @@ public class AlertService {
                 .sigunguName(req.sigunguName())
                 .label(req.label())
                 .isMyLocation(req.isMyLocation() != null && req.isMyLocation())
+                .category(req.category() != null ? AlertSubscription.Category.valueOf(req.category())
+                    : AlertSubscription.Category.OTHER)
                 .build();
 
         return AlertDto.SubscriptionResponse.from(subscriptionRepository.save(subscription));

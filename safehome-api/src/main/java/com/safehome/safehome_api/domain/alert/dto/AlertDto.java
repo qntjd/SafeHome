@@ -15,7 +15,8 @@ public class AlertDto {
             @NotBlank String sidoName,
             String sigunguName,
             String label,
-            Boolean isMyLocation
+            Boolean isMyLocation,
+            String category
     ) {}
 
     public record SubscriptionResponse(
@@ -26,7 +27,8 @@ public class AlertDto {
             String label,
             String displayName,
             Boolean isMyLocation,
-            Boolean isActive
+            Boolean isActive,
+            String category
     ) {
         public static SubscriptionResponse from(AlertSubscription s) {
             return new SubscriptionResponse(
@@ -37,7 +39,8 @@ public class AlertDto {
                     s.getLabel(),
                     s.getDisplayName(),
                     s.getIsMyLocation(),
-                    s.getIsActive()
+                    s.getIsActive(),
+                    s.getCategory().name()
             );
         }
     }

@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Link } from 'react-router-dom'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
 import { useState } from 'react'
+import api from '@/api/axios'
 
 interface FormData {
   email: string
@@ -11,12 +12,52 @@ interface FormData {
 }
 
 export default function RegisterPage() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>()
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>()
   const { handleRegister } = useAuth()
   const { position } = useCurrentLocation()
   const [error, setError] = useState('')
+  const [codeSent, setCodeSent] = useState(false)
+  const [verifyCode, setVerifyCode] = useState('')
+  const [isVerified, setIsVerified] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+
+  const email = watch('email')
+
+  const sendCode = async () => {
+    if (!email) return setError('이메일을 입력해주세요.')
+    setSending(true)
+    try {
+      await api.post('/auth/email/send', { email })
+      setCodeSent(true)
+      setError('')
+    } catch {
+      setError('인증코드 발송에 실패했습니다.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const verifyEmail = async () => {
+    if (!verifyCode) return setError('인증코드를 입력해주세요.')
+    setVerifying(true)
+    try {
+      const res = await api.post('/auth/email/verify', { email, code: verifyCode })
+      if (res.data?.data) {
+        setIsVerified(true)
+        setError('')
+      } else {
+        setError('인증코드가 올바르지 않습니다.')
+      }
+    } catch {
+      setError('인증 확인에 실패했습니다.')
+    } finally {
+      setVerifying(false)
+    }
+  }
 
   const onSubmit = async ({ email, password, nickname }: FormData) => {
+    if (!isVerified) return setError('이메일 인증을 완료해주세요.')
     try {
       setError('')
       await handleRegister(email, password, nickname, position.lat, position.lng)
@@ -62,17 +103,33 @@ export default function RegisterPage() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
+            {/* 이메일 + 인증 버튼 */}
             <div>
               <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 이메일
               </label>
-              <input
-                type="email"
-                placeholder="email@example.com"
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500"
-                style={inputStyle}
-                {...register('email', { required: '이메일을 입력해주세요.' })}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="email@example.com"
+                  className="flex-1 rounded-xl px-4 py-3 text-sm outline-none"
+                  style={inputStyle}
+                  disabled={isVerified}
+                  {...register('email', { required: '이메일을 입력해주세요.' })}
+                />
+                {!isVerified && (
+                  <button
+                    type="button"
+                    onClick={sendCode}
+                    disabled={sending}
+                    className="rounded-xl px-4 py-3 text-sm font-medium shrink-0 disabled:opacity-50"
+                    style={{ background: 'var(--accent-blue)', color: '#fff' }}
+                  >
+                    {sending ? '발송 중...' : codeSent ? '재발송' : '인증'}
+                  </button>
+                )}
+              </div>
               {errors.email && (
                 <p className="text-xs mt-1" style={{ color: 'var(--accent-red)' }}>
                   {errors.email.message}
@@ -80,13 +137,53 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {/* 인증코드 입력 */}
+            {codeSent && !isVerified && (
+              <div>
+                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  인증코드
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="6자리 코드 입력"
+                    maxLength={6}
+                    value={verifyCode}
+                    onChange={e => setVerifyCode(e.target.value)}
+                    className="flex-1 rounded-xl px-4 py-3 text-sm outline-none"
+                    style={inputStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={verifyEmail}
+                    disabled={verifying}
+                    className="rounded-xl px-4 py-3 text-sm font-medium shrink-0 disabled:opacity-50"
+                    style={{ background: '#34D399', color: '#fff' }}
+                  >
+                    {verifying ? '확인 중...' : '확인'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 인증 완료 표시 */}
+            {isVerified && (
+              <div
+                className="rounded-xl px-4 py-2.5 text-sm"
+                style={{ background: 'rgba(52,211,153,0.1)', color: '#34D399' }}
+              >
+                ✅ 이메일 인증 완료
+              </div>
+            )}
+
+            {/* 닉네임 */}
             <div>
               <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 닉네임
               </label>
               <input
                 placeholder="홍길동"
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={inputStyle}
                 {...register('nickname', { required: '닉네임을 입력해주세요.' })}
               />
@@ -97,6 +194,7 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {/* 비밀번호 */}
             <div>
               <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 비밀번호
@@ -104,7 +202,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 placeholder="8자 이상 입력해주세요"
-                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={inputStyle}
                 {...register('password', {
                   required: '비밀번호를 입력해주세요.',
@@ -133,7 +231,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isVerified}
               className="w-full rounded-xl py-3 text-sm font-medium transition-all disabled:opacity-50"
               style={{ background: 'var(--accent-blue)', color: '#fff' }}
             >

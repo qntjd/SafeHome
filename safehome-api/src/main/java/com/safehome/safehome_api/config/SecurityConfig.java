@@ -49,7 +49,11 @@ public class SecurityConfig {
                                 "/login/oauth2/**",
                                 "/oauth2/**",
                                 "/api/crime/**",
-                                "/api/trips/share/**"
+                                "/api/trips/share/**",
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/api/auth/email/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
