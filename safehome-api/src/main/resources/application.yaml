@@ -13,8 +13,6 @@ spring:
           auth: true
           starttls:
             enable: true
-  app:
-    frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:safehome}
@@ -63,3 +61,5 @@ public-api:
   disaster:
     url: https://www.safetydata.go.kr/V2/api/DSSP-IF-00247
     key: ${DISASTER_API_KEY:YOUR_API_KEY}
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
