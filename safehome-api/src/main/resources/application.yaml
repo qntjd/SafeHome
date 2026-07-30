@@ -44,7 +44,7 @@ spring:
             scope:
               - email
               - profile
-            redirect-uri: "http://safehome-api.duckdns.org:8080/login/oauth2/code/google"
+            redirect-uri: "https://safehome-api.duckdns.org:8080/login/oauth2/code/google"
 
 jwt:
   secret: ${JWT_SECRET:safehome-secret-key-for-dev-must-be-32chars!!}
