@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell, Legend
+  ResponsiveContainer, Cell,
 } from 'recharts'
 import { crimeApi } from '@/api/crime'
 import type { DistrictCrimeResponse } from '@/api/crime'

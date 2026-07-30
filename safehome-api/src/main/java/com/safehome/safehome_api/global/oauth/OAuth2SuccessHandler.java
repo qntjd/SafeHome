@@ -6,6 +6,7 @@ import com.safehome.safehome_api.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,6 +23,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -35,13 +39,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken  = jwtProvider.createAccessToken(email, user.getRole().name());
         String refreshToken = jwtProvider.createRefreshToken(email);
 
-        // 닉네임 URL 인코딩 추가
         String encodedNickname = URLEncoder.encode(user.getNickname(), StandardCharsets.UTF_8);
         String encodedEmail    = URLEncoder.encode(email, StandardCharsets.UTF_8);
 
         String redirectUrl = String.format(
-                "http://localhost:5173/oauth/callback?accessToken=%s&refreshToken=%s&nickname=%s&email=%s",
-                accessToken, refreshToken, encodedNickname, encodedEmail
+                "%s/oauth/callback?accessToken=%s&refreshToken=%s&nickname=%s&email=%s",
+                frontendUrl, accessToken, refreshToken, encodedNickname, encodedEmail
         );
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

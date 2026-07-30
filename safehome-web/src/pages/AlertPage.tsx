@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { alertApi } from '@/api/alert'
-import  type { SubscribeRequest } from '@/api/alert'
+import type { SubscribeRequest } from '@/api/alert'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
+import { getRegionFromCoords } from '@/api/kakaoLocal'
 import { useState } from 'react'
 import Footer from '@/components/Footer'
 
@@ -14,7 +15,7 @@ const LEVEL_STYLE = {
 export default function AlertPage() {
   const queryClient = useQueryClient()
   const { position } = useCurrentLocation()
-  const [radius, setRadius] = useState(3)
+  const [isSubscribing, setIsSubscribing] = useState(false)
 
   const { data: subs } = useQuery({
     queryKey: ['subscriptions'],
@@ -36,6 +37,23 @@ export default function AlertPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['subscriptions'] }),
   })
 
+  const handleSubscribe = async () => {
+    setIsSubscribing(true)
+    try {
+      const region = await getRegionFromCoords(position.lat, position.lng)
+      subscribeMutation.mutate({
+        alertType: 'ALL',
+        sidoName: region.sidoName,
+        sigunguName: region.sigunguName,
+        isMyLocation: true,
+      })
+    } catch (err) {
+      console.error('행정구역 변환 실패:', err)
+    } finally {
+      setIsSubscribing(false)
+    }
+  }
+
   const subscriptions = subs?.data?.data ?? []
   const alerts = history?.data?.data ?? []
 
@@ -44,27 +62,12 @@ export default function AlertPage() {
       {/* 구독 등록 */}
       <section className="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 className="font-semibold text-gray-900 mb-4">현재 위치 알림 구독</h2>
-        <div className="flex items-center gap-3 mb-4">
-          <label className="text-sm text-gray-600">반경</label>
-          <input
-            type="range" min={1} max={10} step={1}
-            value={radius}
-            onChange={(e) => setRadius(Number(e.target.value))}
-            className="flex-1"
-          />
-          <span className="text-sm font-medium w-12">{radius} km</span>
-        </div>
         <button
-          onClick={() => subscribeMutation.mutate({
-            alertType: 'ALL',
-            centerLat: position.lat,
-            centerLng: position.lng,
-            radiusKm: radius,
-          })}
-          disabled={subscribeMutation.isPending}
+          onClick={handleSubscribe}
+          disabled={subscribeMutation.isPending || isSubscribing}
           className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          {subscribeMutation.isPending ? '등록 중...' : '현재 위치로 구독 등록'}
+          {isSubscribing || subscribeMutation.isPending ? '등록 중...' : '현재 위치로 구독 등록'}
         </button>
       </section>
 
@@ -77,7 +80,7 @@ export default function AlertPage() {
               <div key={sub.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                 <div>
                   <p className="text-sm font-medium text-gray-700">{sub.alertType}</p>
-                  <p className="text-xs text-gray-400">반경 {sub.radiusKm}km</p>
+                  <p className="text-xs text-gray-400">{sub.displayName}</p>
                 </div>
                 <button
                   onClick={() => unsubscribeMutation.mutate(sub.id)}
@@ -116,6 +119,5 @@ export default function AlertPage() {
       </section>
       <Footer />
     </div>
-    
   )
 }

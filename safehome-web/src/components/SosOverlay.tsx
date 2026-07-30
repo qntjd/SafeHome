@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSosDetection } from '@/hooks/useSosDetection'
 import { tripApi } from '@/api/trip'
-import { useAuthStore } from '@/store/authStore'
+// import { useAuthStore } from '@/store/authStore'
 
 interface Props {
   activeTripId?: string | null
@@ -13,7 +13,7 @@ export default function SosOverlay({ activeTripId }: Props) {
   const [autoTriggered, setAutoTriggered] = useState(false)
   const [sending, setSending]           = useState(false)
   const [sent, setSent]                 = useState(false)
-  const nickname = useAuthStore(s => s.nickname)
+  // const nickname = useAuthStore(s => s.nickname)
 
   const handleDetected = useCallback(() => {
     if (sosMode) return

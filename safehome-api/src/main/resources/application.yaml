@@ -13,6 +13,8 @@ spring:
           auth: true
           starttls:
             enable: true
+  app:
+    frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:safehome}
