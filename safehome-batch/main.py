@@ -21,7 +21,7 @@ def run_all():
     print("=" * 40)
 
 if __name__ == "__main__":
-    run_all()
+    
 
     # 뉴스는 1시간마다 수집
     schedule.every().hour.do(collect_news)
