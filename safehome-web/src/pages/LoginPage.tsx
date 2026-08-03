@@ -144,7 +144,7 @@ export default function LoginPage() {
 
         {/* 구글 로그인 버튼 */}
           <a
-          href="http://localhost:8080/oauth2/authorization/google"
+          href="/oauth2/authorization/google"
           className="flex items-center justify-center gap-3 w-full rounded-xl py-3 text-sm font-medium transition-all"
           style={{
             background: 'var(--bg-hover)',

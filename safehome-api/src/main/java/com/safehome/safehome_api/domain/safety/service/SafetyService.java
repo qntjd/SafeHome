@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-// @Cacheable 제거하고 수동 캐싱으로 변경
 import org.springframework.data.redis.core.RedisTemplate;
 import java.time.Duration;
 
@@ -24,11 +23,22 @@ public class SafetyService {
     private final RedisTemplate<String, String> redisTemplate;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    // 반경(미터) 기준으로 좌표 검색을 수행하는 공통 헬퍼
+    private List<SafetyFacility> findWithinRadius(double lat, double lng, double radiusMeters) {
+        double latDelta = radiusMeters / 111000.0;
+        double lngDelta = radiusMeters / (111000.0 * Math.cos(Math.toRadians(lat)));
+
+        return facilityRepository.findWithinRadius(
+                lat, lng, radiusMeters,
+                lat - latDelta, lat + latDelta,
+                lng - lngDelta, lng + lngDelta
+        );
+    }
+
     @Transactional(readOnly = true)
     public SafetyDto.HeatmapResponse getHeatmap() {
         String cacheKey = "heatmap:all";
 
-        // 캐시 확인
         String cached = redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
             try {
@@ -36,14 +46,12 @@ public class SafetyService {
             } catch (Exception ignored) {}
         }
 
-        // DB 조회
         List<SafetyDto.ScoreResponse> list = districtScoreRepository.findAllOrderByScore()
                 .stream()
                 .map(SafetyDto.ScoreResponse::from)
                 .toList();
         SafetyDto.HeatmapResponse response = new SafetyDto.HeatmapResponse(list);
 
-        // 캐시 저장
         try {
             redisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(response), Duration.ofHours(1));
         } catch (Exception ignored) {}
@@ -63,7 +71,7 @@ public class SafetyService {
             } catch (Exception ignored) {}
         }
 
-        List<SafetyDto.FacilityResponse> response = facilityRepository.findWithinRadius(lat, lng, radius)
+        List<SafetyDto.FacilityResponse> response = findWithinRadius(lat, lng, radius)
                 .stream()
                 .map(SafetyDto.FacilityResponse::from)
                 .toList();
@@ -82,13 +90,11 @@ public class SafetyService {
         return SafetyDto.ScoreResponse.from(score);
     }
 
-
     @Transactional(readOnly = true)
     public SafetyDto.SafeRouteResponse getSafeRoute(
             double startLat, double startLng,
             double endLat,   double endLng
     ) {
-        // 출발지와 도착지 중간 지점들 계산 (3구간으로 나눔)
         List<double[]> checkPoints = List.of(
                 new double[]{ startLat * 0.75 + endLat * 0.25, startLng * 0.75 + endLng * 0.25 },
                 new double[]{ startLat * 0.5  + endLat * 0.5,  startLng * 0.5  + endLng * 0.5  },
@@ -99,8 +105,7 @@ public class SafetyService {
         int totalCctv = 0, totalBell = 0, totalPolice = 0;
 
         for (double[] point : checkPoints) {
-            List<SafetyFacility> facilities =
-                    facilityRepository.findWithinRadius(point[0], point[1], 300);
+            List<SafetyFacility> facilities = findWithinRadius(point[0], point[1], 300);
 
             int cctv   = (int) facilities.stream().filter(f -> f.getType().name().equals("CCTV")).count();
             int bell   = (int) facilities.stream().filter(f -> f.getType().name().equals("EMERGENCY_BELL")).count();
@@ -110,7 +115,6 @@ public class SafetyService {
             totalBell   += bell;
             totalPolice += police;
 
-            // 안전시설이 있는 경유 지점만 추가
             if (cctv + bell + police > 0) {
                 facilities.stream().findFirst().ifPresent(f ->
                         safePoints.add(new SafetyDto.RoutePoint(
@@ -122,17 +126,15 @@ public class SafetyService {
             }
         }
 
-        // 안전점수 계산 (CCTV 40% + 비상벨 30% + 경찰서 30%)
         double safetyScore = Math.min(100,
                 (totalCctv * 2.0) + (totalBell * 3.0) + (totalPolice * 5.0));
 
         return new SafetyDto.SafeRouteResponse(safePoints, totalCctv, totalBell, totalPolice, safetyScore);
     }
 
-
     @Transactional(readOnly = true)
     public SafetyDto.NearbyDangerResponse getNearbyDanger(double lat, double lng) {
-        List<SafetyFacility> facilities = facilityRepository.findWithinRadius(lat, lng, 500);
+        List<SafetyFacility> facilities = findWithinRadius(lat, lng, 500);
 
         int cctv   = (int) facilities.stream().filter(f -> f.getType().name().equals("CCTV")).count();
         int bell   = (int) facilities.stream().filter(f -> f.getType().name().equals("EMERGENCY_BELL")).count();
