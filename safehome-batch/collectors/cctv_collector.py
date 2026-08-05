@@ -46,7 +46,7 @@ def collect_cctv():
             params = {
                 "serviceKey": API_KEY,
                 "type":       "json",
-                "numOfRows":  1000,
+                "numOfRows":  100,   # ← 1000에서 100으로 수정
                 "pageNo":     page,
             }
 
@@ -96,7 +96,7 @@ def collect_cctv():
                     .get("body", {})
                     .get("totalCount", 0)
             )
-            if page * 1000 >= total_count:
+            if page * 100 >= total_count:   # ← 1000에서 100으로 수정
                 break
             page += 1
 

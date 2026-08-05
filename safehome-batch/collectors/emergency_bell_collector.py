@@ -39,7 +39,7 @@ def collect_emergency_bells():
             params = {
                 "serviceKey": API_KEY,
                 "type":       "json",
-                "numOfRows":  1000,
+                "numOfRows":  100,  # API 최대치에 맞춤
                 "pageNo":     page,
             }
 
@@ -89,7 +89,7 @@ def collect_emergency_bells():
                     .get("body", {})
                     .get("totalCount", 0)
             )
-            if page * 1000 >= total_count:
+            if page * 100 >= total_count:  # numOfRows와 동일하게 100으로 수정
                 break
             page += 1
 

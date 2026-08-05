@@ -1,22 +1,18 @@
 import requests
-from config import API_KEY, TARGET_DISTRICTS
+from config import API_KEY
 from db import get_connection, upsert_crime_stat
 
-# 2024년 데이터 엔드포인트
 CRIME_API_URL = "https://api.odcloud.kr/api/3074462/v1/uddi:ae109087-8690-4cb5-bda9-a7876a92f3b8"
 
-# 대구 지역 컬럼명 매핑 (응답 필드명 → 우리 districtCode)
-DAEGU_DISTRICT_MAP = {
-    "대구 중구":   "2771010100",
-    "대구 동구":   "2771010200",
-    "대구 서구":   "2771010300",
-    "대구 남구":   "2771010400",
-    "대구 북구":   "2771010500",
-    "대구 수성구": "2771010600",
-    "대구 달서구": "2771010700",
-    "대구 달성군": "2771010800",
+# 컬럼명 접두어(시도 약칭) → (시도코드, 시도명) — CCTV/비상벨과 동일한 코드 체계
+SIDO_MAP = {
+    "서울": ("11", "서울"), "부산": ("21", "부산"), "대구": ("22", "대구"),
+    "인천": ("23", "인천"), "광주": ("24", "광주"), "대전": ("25", "대전"),
+    "울산": ("26", "울산"), "세종": ("36", "세종"), "경기": ("31", "경기"),
+    "강원": ("32", "강원"), "충북": ("33", "충북"), "충남": ("34", "충남"),
+    "전북": ("35", "전북"), "전남": ("46", "전남"), "경북": ("47", "경북"),
+    "경남": ("48", "경남"), "제주": ("50", "제주"),
 }
-
 
 CRIME_TYPE_MAP = {
     "강력범죄":     "VIOLENT",
@@ -37,15 +33,14 @@ CRIME_TYPE_MAP = {
 }
 
 def collect_crime_stats():
-    print("[범죄통계] 수집 시작")
+    print("[범죄통계] 전국 수집 시작")
     conn = get_connection()
     total = 0
     page = 1
 
-    # 지역별 범죄 건수 누적 딕셔너리
     # { district_code: { crime_type: count } }
     district_counts: dict[str, dict[str, int]] = {
-        code: {} for code in DAEGU_DISTRICT_MAP.values()
+        code: {} for code, _ in SIDO_MAP.values()
     }
 
     while True:
@@ -69,9 +64,16 @@ def collect_crime_stats():
                 crime_type_raw = item.get("범죄대분류", "")
                 crime_type = CRIME_TYPE_MAP.get(crime_type_raw, "OTHER")
 
-                # 대구 각 구별 건수 추출
-                for district_name, district_code in DAEGU_DISTRICT_MAP.items():
-                    count = item.get(district_name, 0) or 0
+                for key, value in item.items():
+                    if key in ("범죄대분류", "범죄중분류"):
+                        continue
+                    # 컬럼명 예: "서울 강남구" → 앞부분("서울")으로 시도 판별
+                    sido_short = key.split(" ")[0]
+                    if sido_short not in SIDO_MAP:
+                        continue
+                    district_code, _ = SIDO_MAP[sido_short]
+
+                    count = value or 0
                     try:
                         count = int(count)
                     except (ValueError, TypeError):
@@ -92,9 +94,6 @@ def collect_crime_stats():
             print(f"[범죄통계] 수집 실패 (페이지 {page}): {e}")
             break
 
-    # DB 저장
-    from datetime import datetime
-    now = datetime.now()
     for district_code, crime_map in district_counts.items():
         for crime_type, count in crime_map.items():
             if count == 0:
@@ -103,11 +102,11 @@ def collect_crime_stats():
                 conn=conn,
                 district_code=district_code,
                 year=2024,
-                month=0,  # 연간 통계
+                month=0,
                 crime_type=crime_type,
                 count=count,
             )
             total += 1
 
     conn.close()
-    print(f"[범죄통계] 수집 완료 → 총 {total}건 저장")
+    print(f"[범죄통계] 전국 수집 완료 → 총 {total}건 저장")
