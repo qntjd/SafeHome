@@ -158,4 +158,29 @@ public class SafetyService {
 
         return new SafetyDto.NearbyDangerResponse(cctv, bell, police, dangerLevel, message);
     }
+
+    @Transactional(readOnly = true)
+    public SafetyDto.FacilityCountResponse getNearbyFacilityCounts(double lat, double lng, double radius) {
+        double latDelta = radius / 111000.0;
+        double lngDelta = radius / (111000.0 * Math.cos(Math.toRadians(lat)));
+
+        List<Object[]> rows = facilityRepository.countWithinRadiusByType(
+                lat, lng, radius,
+                lat - latDelta, lat + latDelta,
+                lng - lngDelta, lng + lngDelta
+        );
+
+        int cctv = 0, bell = 0, police = 0;
+        for (Object[] row : rows) {
+            String type = (String) row[0];
+            long count = ((Number) row[1]).longValue();
+            switch (type) {
+                case "CCTV" -> cctv = (int) count;
+                case "EMERGENCY_BELL" -> bell = (int) count;
+                case "POLICE" -> police = (int) count;
+            }
+        }
+
+        return new SafetyDto.FacilityCountResponse(cctv, bell, police);
+    }
 }

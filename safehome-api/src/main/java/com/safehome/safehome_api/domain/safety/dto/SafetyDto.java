@@ -91,4 +91,10 @@ public class SafetyDto {
     public record HeatmapResponse(
             List<ScoreResponse> districts
     ) implements Serializable {}
+
+    public record FacilityCountResponse(
+            int cctvCount,
+            int bellCount,
+            int policeCount
+    ) implements Serializable {}
 }

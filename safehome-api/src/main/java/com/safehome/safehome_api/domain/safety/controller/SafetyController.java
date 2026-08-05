@@ -61,4 +61,14 @@ public class SafetyController {
     ) {
         return ApiResponse.success(safetyService.getNearbyDanger(lat, lng));
     }
+
+    @Operation(summary = "주변 안전시설 개수 조회 (타입별 정확한 카운트)")
+    @GetMapping("/facilities/count")
+    public ApiResponse<SafetyDto.FacilityCountResponse> getFacilityCounts(
+            @RequestParam Double lat,
+            @RequestParam Double lng,
+            @RequestParam(defaultValue = "500") Double radius
+    ) {
+        return ApiResponse.success(safetyService.getNearbyFacilityCounts(lat, lng, radius));
+    }
 }

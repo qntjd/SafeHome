@@ -11,9 +11,10 @@ public interface SafetyFacilityRepository extends JpaRepository<SafetyFacility, 
 
     List<SafetyFacility> findAllByDistrictCode(String districtCode);
 
-    @Query("""
-        SELECT f FROM SafetyFacility f
-        WHERE f.isActive = true
+    // 지도 마커용 — 가까운 순 최대 300개
+    @Query(value = """
+        SELECT * FROM safety_facilities f
+        WHERE f.is_active = true
           AND f.lat BETWEEN :minLat AND :maxLat
           AND f.lng BETWEEN :minLng AND :maxLng
           AND (6371000 * acos(
@@ -21,8 +22,37 @@ public interface SafetyFacilityRepository extends JpaRepository<SafetyFacility, 
                 cos(radians(f.lng) - radians(:lng)) +
                 sin(radians(:lat)) * sin(radians(f.lat))
               )) <= :radiusMeters
-    """)
+        ORDER BY (6371000 * acos(
+                cos(radians(:lat)) * cos(radians(f.lat)) *
+                cos(radians(f.lng) - radians(:lng)) +
+                sin(radians(:lat)) * sin(radians(f.lat))
+              ))
+        LIMIT 300
+        """, nativeQuery = true)
     List<SafetyFacility> findWithinRadius(
+            @Param("lat") double lat,
+            @Param("lng") double lng,
+            @Param("radiusMeters") double radiusMeters,
+            @Param("minLat") double minLat,
+            @Param("maxLat") double maxLat,
+            @Param("minLng") double minLng,
+            @Param("maxLng") double maxLng
+    );
+
+    // 하단 카드용 — 타입별 정확한 개수
+    @Query(value = """
+        SELECT f.type as type, COUNT(*) as cnt FROM safety_facilities f
+        WHERE f.is_active = true
+          AND f.lat BETWEEN :minLat AND :maxLat
+          AND f.lng BETWEEN :minLng AND :maxLng
+          AND (6371000 * acos(
+                cos(radians(:lat)) * cos(radians(f.lat)) *
+                cos(radians(f.lng) - radians(:lng)) +
+                sin(radians(:lat)) * sin(radians(f.lat))
+              )) <= :radiusMeters
+        GROUP BY f.type
+        """, nativeQuery = true)
+    List<Object[]> countWithinRadiusByType(
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radiusMeters") double radiusMeters,
