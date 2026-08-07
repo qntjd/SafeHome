@@ -57,10 +57,12 @@ public class AlertController {
         return ApiResponse.success(alertService.getMySubscriptions(user.getUsername()));
     }
 
-    @Operation(summary = "전체 알림 이력 조회")
-    @GetMapping("/history")
-    public ApiResponse<List<AlertDto.AlertHistoryResponse>> getHistory() {
-        return ApiResponse.success(alertService.getAlertHistory());
+    @Operation(summary = "관심 지역 알림 이력 조회")
+    @GetMapping("/history/interested")
+    public ApiResponse<List<AlertDto.AlertHistoryResponse>> getInterestedHistory(
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        return ApiResponse.success(alertService.getInterestedLocationAlerts(user.getUsername()));
     }
 
     @Operation(summary = "내 지역 알림 이력 조회")

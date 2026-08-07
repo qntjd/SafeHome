@@ -86,21 +86,46 @@ public class AlertService {
     public List<AlertDto.AlertHistoryResponse> getMyLocationAlerts(String email) {
         User user = findUser(email);
         // 내 지역 구독 목록 가져와서 해당 지역 알림만 필터링
-        List<AlertSubscription> myLocSubs = subscriptionRepository
+        List<String> mySidos = subscriptionRepository
                 .findAllByUserIdAndIsActiveTrue(user.getId())
                 .stream()
                 .filter(AlertSubscription::getIsMyLocation)
+                .map(AlertSubscription::getSidoName)
+                .distinct()
                 .toList();
 
-        if (myLocSubs.isEmpty()) return List.of();
+        if (mySidos.isEmpty()) return List.of();
 
-        String sido = myLocSubs.get(0).getSidoName();
         return alertRepository.findTop20ByOrderByIssuedAtDesc()
                 .stream()
-                .filter(a -> a.getDistrictName() != null && a.getDistrictName().contains(sido))
+                .filter(a -> a.getDistrictName() != null && 
+                mySidos.stream().anyMatch(sido -> a.getDistrictName().contains(sido)))
+                .map(AlertDto.AlertHistoryResponse::from)
+                .toList();
+
+    }
+    @Transactional(readOnly = true)
+    public List<AlertDto.AlertHistoryResponse> getInterestedLocationAlerts(String email) {
+        User user = findUser(email);
+
+        List<String> interstedSidos = subscriptionRepository
+                .findAllByUserIdAndIsActiveTrue(user.getId())
+                .stream()
+                .filter(sub -> !sub.getIsMyLocation())
+                .map(AlertSubscription::getSidoName)
+                .distinct()
+                .toList();
+
+        if (interstedSidos.isEmpty()) return List.of();
+
+        return alertRepository.findTop20ByOrderByIssuedAtDesc()
+                .stream()
+                .filter(a -> a.getDistrictName() != null && 
+                interstedSidos.stream().anyMatch(sido -> a.getDistrictName().contains(sido)))
                 .map(AlertDto.AlertHistoryResponse::from)
                 .toList();
     }
+
 
     private User findUser(String email) {
         return userRepository.findByEmail(email)
