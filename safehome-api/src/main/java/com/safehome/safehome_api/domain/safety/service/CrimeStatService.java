@@ -46,35 +46,16 @@ public class CrimeStatService {
         "OTHER",   "기타"
     );
 
-    @Cacheable(value = "crimes", key = "'all'")
+    @Cacheable(value = "crimes", key = "#year")
     @Transactional(readOnly = true)
-    public CrimeStatDto.AllDistrictCrimeResponse getAllDistrictCrimes() {
-        List<CrimeStat> stats = crimeStatRepository.findAllByYear(2024);
+    public CrimeStatDto.AllDistrictCrimeResponse getAllDistrictCrimes(Integer year) {
+        List<CrimeStat> stats = crimeStatRepository.findAllByYear(year);
 
         Map<String, List<CrimeStat>> grouped = stats.stream()
                 .collect(Collectors.groupingBy(CrimeStat::getDistrictCode));
 
         List<CrimeStatDto.DistrictCrimeResponse> districts = grouped.entrySet().stream()
-                .map(entry -> {
-                    String code = entry.getKey();
-                    List<CrimeStat> districtStats = entry.getValue();
-
-                    Map<String, Integer> crimeByType = districtStats.stream()
-                            .collect(Collectors.toMap(
-                                    s -> CRIME_TYPE_LABELS.getOrDefault(s.getCrimeType().name(), s.getCrimeType().name()),
-                                    CrimeStat::getCount,
-                                    Integer::sum
-                            ));
-
-                    int totalCount = crimeByType.values().stream().mapToInt(Integer::intValue).sum();
-
-                    return new CrimeStatDto.DistrictCrimeResponse(
-                            code,
-                            DISTRICT_NAMES.getOrDefault(code, code),
-                            crimeByType,
-                            totalCount
-                    );
-                })
+                .map(entry -> buildDistrictResponse(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparingInt(CrimeStatDto.DistrictCrimeResponse::totalCount).reversed())
                 .toList();
 
@@ -82,9 +63,34 @@ public class CrimeStatService {
     }
 
     @Transactional(readOnly = true)
-    public CrimeStatDto.DistrictCrimeResponse getDistrictCrimes(String districtCode) {
+    public CrimeStatDto.DistrictCrimeResponse getDistrictCrimes(String districtCode, Integer year) {
+        List<CrimeStat> stats = crimeStatRepository.findAllByDistrictCodeAndYear(districtCode, year);
+        return buildDistrictResponse(districtCode, stats);
+    }
+
+    @Transactional(readOnly = true)
+    public CrimeStatDto.CrimeTrendResponse getCrimeTrend(String districtCode) {
         List<CrimeStat> stats = crimeStatRepository.findAllByDistrictCode(districtCode);
 
+        Map<Integer, Integer> byYear = stats.stream()
+                .collect(Collectors.groupingBy(
+                        CrimeStat::getYear,
+                        Collectors.summingInt(CrimeStat::getCount)
+                ));
+
+        List<CrimeStatDto.YearlyCrimeCount> yearlyTrend = byYear.entrySet().stream()
+                .map(e -> new CrimeStatDto.YearlyCrimeCount(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparingInt(CrimeStatDto.YearlyCrimeCount::year))
+                .toList();
+
+        return new CrimeStatDto.CrimeTrendResponse(
+                districtCode,
+                DISTRICT_NAMES.getOrDefault(districtCode, districtCode),
+                yearlyTrend
+        );
+    }
+
+    private CrimeStatDto.DistrictCrimeResponse buildDistrictResponse(String code, List<CrimeStat> stats) {
         Map<String, Integer> crimeByType = stats.stream()
                 .collect(Collectors.toMap(
                         s -> CRIME_TYPE_LABELS.getOrDefault(s.getCrimeType().name(), s.getCrimeType().name()),
@@ -95,8 +101,8 @@ public class CrimeStatService {
         int totalCount = crimeByType.values().stream().mapToInt(Integer::intValue).sum();
 
         return new CrimeStatDto.DistrictCrimeResponse(
-                districtCode,
-                DISTRICT_NAMES.getOrDefault(districtCode, districtCode),
+                code,
+                DISTRICT_NAMES.getOrDefault(code, code),
                 crimeByType,
                 totalCount
         );

@@ -18,15 +18,26 @@ public class CrimeStatController {
 
     @Operation(summary = "전체 지역 범죄 통계 조회")
     @GetMapping
-    public ApiResponse<CrimeStatDto.AllDistrictCrimeResponse> getAllCrimes() {
-        return ApiResponse.success(crimeStatService.getAllDistrictCrimes());
+    public ApiResponse<CrimeStatDto.AllDistrictCrimeResponse> getAllCrimes(
+            @RequestParam(defaultValue = "2024") Integer year
+    ) {
+        return ApiResponse.success(crimeStatService.getAllDistrictCrimes(year));
     }
 
     @Operation(summary = "특정 지역 범죄 통계 조회")
     @GetMapping("/{districtCode}")
     public ApiResponse<CrimeStatDto.DistrictCrimeResponse> getDistrictCrimes(
+            @PathVariable String districtCode,
+            @RequestParam(defaultValue = "2024") Integer year
+    ) {
+        return ApiResponse.success(crimeStatService.getDistrictCrimes(districtCode, year));
+    }
+
+    @Operation(summary = "특정 지역 연도별 범죄 추이 조회")
+    @GetMapping("/{districtCode}/trend")
+    public ApiResponse<CrimeStatDto.CrimeTrendResponse> getCrimeTrend(
             @PathVariable String districtCode
     ) {
-        return ApiResponse.success(crimeStatService.getDistrictCrimes(districtCode));
+        return ApiResponse.success(crimeStatService.getCrimeTrend(districtCode));
     }
 }

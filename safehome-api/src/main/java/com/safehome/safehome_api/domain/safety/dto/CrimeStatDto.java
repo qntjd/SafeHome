@@ -28,4 +28,17 @@ public class CrimeStatDto {
     public record AllDistrictCrimeResponse(
             List<DistrictCrimeResponse> districts
     ) implements Serializable {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record YearlyCrimeCount(
+                Integer year,
+                Integer totalCount
+    ) implements Serializable {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record CrimeTrendResponse(
+                String districtCode,
+                String districtName,
+                List<YearlyCrimeCount> yearlyTrend
+    ) implements Serializable {}
 }

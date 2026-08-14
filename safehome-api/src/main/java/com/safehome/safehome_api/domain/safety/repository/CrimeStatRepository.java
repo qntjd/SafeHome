@@ -25,4 +25,6 @@ public interface CrimeStatRepository extends JpaRepository<CrimeStat, UUID> {
     List<CrimeStat> findAllByDistrictCode(String districtCode);
 
     List<CrimeStat> findAllByYear(int year);
+
+    List<CrimeStat> findAllByDistrictCodeAndYear(String districtCode, Integer year);
 }
