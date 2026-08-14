@@ -2,9 +2,16 @@ import requests
 from config import API_KEY
 from db import get_connection, upsert_crime_stat
 
-CRIME_API_URL = "https://api.odcloud.kr/api/3074462/v1/uddi:ae109087-8690-4cb5-bda9-a7876a92f3b8"
+# 연도별 API 엔드포인트
+CRIME_API_URLS = {
+    2020: "https://api.odcloud.kr/api/3074462/v1/uddi:5c067b9b-efe1-414a-8096-89b67ee686bf",
+    2021: "https://api.odcloud.kr/api/3074462/v1/uddi:14dc5ecc-3702-4df9-9dae-cb2337bf93cb",
+    2022: "https://api.odcloud.kr/api/3074462/v1/uddi:fe3ae686-8f7d-4d82-8c3a-901a02a0aa75",
+    2023: "https://api.odcloud.kr/api/3074462/v1/uddi:161740bd-8ec5-4734-9a3d-f7a2cde34942",
+    2024: "https://api.odcloud.kr/api/3074462/v1/uddi:ae109087-8690-4cb5-bda9-a7876a92f3b8",
+}
 
-# 컬럼명 접두어(시도 약칭) → (시도코드, 시도명) — CCTV/비상벨과 동일한 코드 체계
+# 컬럼명(시도 약칭) → (시도코드, 시도명)
 SIDO_MAP = {
     "서울": ("11", "서울"), "부산": ("21", "부산"), "대구": ("22", "대구"),
     "인천": ("23", "인천"), "광주": ("24", "광주"), "대전": ("25", "대전"),
@@ -32,13 +39,26 @@ CRIME_TYPE_MAP = {
     "기타범죄":     "OTHER",
 }
 
+
 def collect_crime_stats():
-    print("[범죄통계] 전국 수집 시작")
+    print("[범죄통계] 전국 수집 시작 (2020~2024)")
     conn = get_connection()
+    total = 0
+
+    for year, api_url in CRIME_API_URLS.items():
+        print(f"[범죄통계] {year}년 수집 시작")
+        year_total = collect_year(conn, year, api_url)
+        total += year_total
+        print(f"[범죄통계] {year}년 수집 완료 → {year_total}건")
+
+    conn.close()
+    print(f"[범죄통계] 전체 수집 완료 → 총 {total}건 저장")
+
+
+def collect_year(conn, year: int, api_url: str) -> int:
     total = 0
     page = 1
 
-    # { district_code: { crime_type: count } }
     district_counts: dict[str, dict[str, int]] = {
         code: {} for code, _ in SIDO_MAP.values()
     }
@@ -52,7 +72,7 @@ def collect_crime_stats():
                 "returnType": "json",
             }
 
-            res = requests.get(CRIME_API_URL, params=params, timeout=10)
+            res = requests.get(api_url, params=params, timeout=10)
             res.raise_for_status()
             data = res.json()
 
@@ -67,7 +87,6 @@ def collect_crime_stats():
                 for key, value in item.items():
                     if key in ("범죄대분류", "범죄중분류"):
                         continue
-                    # 컬럼명 예: "서울 강남구" → 앞부분("서울")으로 시도 판별
                     sido_short = key.split(" ")[0]
                     if sido_short not in SIDO_MAP:
                         continue
@@ -84,14 +103,13 @@ def collect_crime_stats():
                     district_counts[district_code][crime_type] += count
 
             total_count = data.get("totalCount", 0)
-            print(f"[범죄통계] 페이지 {page} 처리 완료")
 
             if page * 100 >= total_count:
                 break
             page += 1
 
         except Exception as e:
-            print(f"[범죄통계] 수집 실패 (페이지 {page}): {e}")
+            print(f"[범죄통계] {year}년 수집 실패 (페이지 {page}): {e}")
             break
 
     for district_code, crime_map in district_counts.items():
@@ -101,12 +119,11 @@ def collect_crime_stats():
             upsert_crime_stat(
                 conn=conn,
                 district_code=district_code,
-                year=2024,
+                year=year,
                 month=0,
                 crime_type=crime_type,
                 count=count,
             )
             total += 1
 
-    conn.close()
-    print(f"[범죄통계] 전국 수집 완료 → 총 {total}건 저장")
+    return total
