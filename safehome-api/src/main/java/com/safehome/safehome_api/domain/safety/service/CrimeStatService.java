@@ -43,6 +43,7 @@ public class CrimeStatService {
         "THEFT",   "절도",
         "FRAUD",   "사기·지능",
         "VICE",    "풍속·마약",
+        "TRAFFIC", "교통범죄",
         "OTHER",   "기타"
     );
 

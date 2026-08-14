@@ -30,7 +30,7 @@ CRIME_TYPE_MAP = {
     "마약범죄":     "VICE",
     "풍속범죄":     "VICE",
     "보건범죄":     "VICE",
-    "교통범죄":     "OTHER",
+    "교통범죄":     "TRAFFIC",
     "노동범죄":     "OTHER",
     "병역범죄":     "OTHER",
     "선거범죄":     "OTHER",
