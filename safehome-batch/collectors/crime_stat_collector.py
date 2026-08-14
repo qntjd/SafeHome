@@ -11,7 +11,7 @@ CRIME_API_URLS = {
     2024: "https://api.odcloud.kr/api/3074462/v1/uddi:ae109087-8690-4cb5-bda9-a7876a92f3b8",
 }
 
-# 컬럼명(시도 약칭) → (시도코드, 시도명)
+# 시도 약칭 → (시도코드, 시도명)
 SIDO_MAP = {
     "서울": ("11", "서울"), "부산": ("21", "부산"), "대구": ("22", "대구"),
     "인천": ("23", "인천"), "광주": ("24", "광주"), "대전": ("25", "대전"),
@@ -38,6 +38,14 @@ CRIME_TYPE_MAP = {
     "환경범죄":     "OTHER",
     "기타범죄":     "OTHER",
 }
+
+
+def match_sido(key: str):
+    """컬럼명에 시/도 이름이 포함되어 있으면 매칭 (공백 유무, '도/시' 접미사 무관)"""
+    for sido, info in SIDO_MAP.items():
+        if key.startswith(sido):
+            return info
+    return None
 
 
 def collect_crime_stats():
@@ -87,10 +95,10 @@ def collect_year(conn, year: int, api_url: str) -> int:
                 for key, value in item.items():
                     if key in ("범죄대분류", "범죄중분류"):
                         continue
-                    sido_short = key.split(" ")[0]
-                    if sido_short not in SIDO_MAP:
+                    sido_info = match_sido(key)
+                    if not sido_info:
                         continue
-                    district_code, _ = SIDO_MAP[sido_short]
+                    district_code, _ = sido_info
 
                     count = value or 0
                     try:
