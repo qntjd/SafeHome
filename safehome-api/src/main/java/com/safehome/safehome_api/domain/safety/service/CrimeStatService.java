@@ -4,7 +4,6 @@ import com.safehome.safehome_api.domain.safety.dto.CrimeStatDto;
 import com.safehome.safehome_api.domain.safety.entity.CrimeStat;
 import com.safehome.safehome_api.domain.safety.repository.CrimeStatRepository;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,15 +17,24 @@ public class CrimeStatService {
 
     private final CrimeStatRepository crimeStatRepository;
 
-    private static final Map<String, String> DISTRICT_NAMES = Map.of(
-        "2771010100", "대구 중구",
-        "2771010200", "대구 동구",
-        "2771010300", "대구 서구",
-        "2771010400", "대구 남구",
-        "2771010500", "대구 북구",
-        "2771010600", "대구 수성구",
-        "2771010700", "대구 달서구",
-        "2771010800", "대구 달성군"
+    private static final Map<String, String> DISTRICT_NAMES = Map.ofEntries(
+        Map.entry("11", "서울"),
+        Map.entry("21", "부산"),
+        Map.entry("22", "대구"),
+        Map.entry("23", "인천"),
+        Map.entry("24", "광주"),
+        Map.entry("25", "대전"),
+        Map.entry("26", "울산"),
+        Map.entry("36", "세종"),
+        Map.entry("31", "경기"),
+        Map.entry("32", "강원"),
+        Map.entry("33", "충북"),
+        Map.entry("34", "충남"),
+        Map.entry("35", "전북"),
+        Map.entry("46", "전남"),
+        Map.entry("47", "경북"),
+        Map.entry("48", "경남"),
+        Map.entry("50", "제주")
     );
 
     private static final Map<String, String> CRIME_TYPE_LABELS = Map.of(
@@ -43,7 +51,6 @@ public class CrimeStatService {
     public CrimeStatDto.AllDistrictCrimeResponse getAllDistrictCrimes() {
         List<CrimeStat> stats = crimeStatRepository.findAllByYear(2024);
 
-        // districtCode별 그룹핑
         Map<String, List<CrimeStat>> grouped = stats.stream()
                 .collect(Collectors.groupingBy(CrimeStat::getDistrictCode));
 
