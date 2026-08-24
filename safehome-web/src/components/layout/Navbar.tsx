@@ -4,14 +4,15 @@ import { useAuth } from '@/hooks/useAuth'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { userApi } from '@/api/user'
 import { useAuthStore } from '@/store/authStore'
+import { Home, Map, Footprints, Newspaper, BarChart3, ShieldCheck, Pencil, Settings, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { path: '/',         label: '홈', icon: '🏠' },
-  { path: '/map',      label: '안전 지도', icon: '🗺' },
-  { path: '/trip',     label: '안심 귀가', icon: '🚶' },
-  { path: '/news',     label: '안전 뉴스', icon: '📰' },
-  { path: '/crime',    label: '범죄 통계', icon: '📊' },
-  { path: '/resources',  label: '개인 정보 보호',    icon: '🛡' },
+  { path: '/',         label: '홈', icon: Home },
+  { path: '/map',      label: '안전 지도', icon: Map },
+  { path: '/trip',     label: '안심 귀가', icon: Footprints },
+  { path: '/news',     label: '안전 뉴스', icon: Newspaper },
+  { path: '/crime',    label: '범죄 통계', icon: BarChart3 },
+  { path: '/resources',  label: '개인 정보 보호',    icon: ShieldCheck },
 ]
 
 export default function Navbar() {
@@ -59,39 +60,49 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="h-14 flex items-center justify-between px-4 sm:px-6 relative z-40"
-        style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}
+        className="h-16 flex items-center justify-between px-4 sm:px-6 relative z-40"
+        style={{ background: 'var(--ink)', borderBottom: '1px solid var(--ink-border)' }}
       >
         {/* 로고 */}
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2.5">
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
-              style={{ background: 'var(--accent-blue)' }}
+              className="w-8 h-8 rounded-full flex items-center justify-center relative"
+              style={{ background: 'var(--accent-amber)' }}
             >
-              S
+              <span className="beacon-dot beacon-dot--static" style={{ position: 'absolute', top: -2, right: -2, background: 'var(--grade-a)', boxShadow: '0 0 0 2px var(--ink)' }} />
+              <span className="font-display font-black text-sm" style={{ color: 'var(--ink)' }}>S</span>
             </div>
-            <span className="font-semibold text-base" style={{ color: 'var(--text-primary)' }}>
+            <span className="font-display font-extrabold text-lg tracking-tight" style={{ color: 'var(--ink-text)' }}>
               SafeHome
             </span>
           </Link>
 
           {/* 데스크탑 메뉴 */}
           <div className="hidden sm:flex items-center gap-1">
-            {NAV_ITEMS.map(({ path, label }) => (
-              <Link
-                key={path}
-                to={path}
-                className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                style={{
-                  color:      pathname === path ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                  background: pathname === path ? 'rgba(79,126,248,0.1)' : 'transparent',
-                  fontWeight: pathname === path ? 500 : 400,
-                }}
-              >
-                {label}
-              </Link>
-            ))}
+            {NAV_ITEMS.map(({ path, label }) => {
+              const active = pathname === path
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  className="relative px-3 py-2 text-sm transition-colors flex items-center gap-1.5"
+                  style={{
+                    color: active ? 'var(--ink-text)' : 'var(--ink-text-muted)',
+                    fontWeight: active ? 600 : 500,
+                  }}
+                >
+                  {active && <span className="beacon-dot" />}
+                  {label}
+                  {active && (
+                    <span
+                      className="absolute left-3 right-3 -bottom-px h-0.5 rounded-full"
+                      style={{ background: 'var(--accent-amber)' }}
+                    />
+                  )}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
@@ -99,24 +110,24 @@ export default function Navbar() {
         <div className="hidden sm:flex items-center gap-3 relative" ref={dropRef}>
           <button
             onClick={() => { setDropOpen(!dropOpen); setEditMode(false) }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all"
+            style={{ background: 'var(--ink-2)', border: '1px solid var(--ink-border)', color: 'var(--ink-text-muted)' }}
           >
             <div
               className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium"
-              style={{ background: 'var(--accent-blue)', color: '#fff' }}
+              style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
             >
               {nickname?.[0]?.toUpperCase()}
             </div>
             {nickname}
-            <span style={{ fontSize: 10, opacity: 0.5 }}>▼</span>
+            <span style={{ fontSize: 10, opacity: 0.6 }}>▾</span>
           </button>
 
           {/* 드롭다운 메뉴 */}
           {dropOpen && (
             <div
-              className="absolute top-10 right-0 w-64 rounded-xl shadow-xl py-2 z-50"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+              className="absolute top-12 right-0 w-64 rounded-2xl py-2 z-50"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}
             >
               {/* 프로필 헤더 */}
               <div
@@ -126,7 +137,7 @@ export default function Navbar() {
                 <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>
                   {email}
                 </p>
-                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {nickname}
                 </p>
               </div>
@@ -153,8 +164,8 @@ export default function Navbar() {
                     <button
                       onClick={() => updateMutation.mutate()}
                       disabled={updateMutation.isPending || !newNickname.trim()}
-                      className="flex-1 rounded-lg py-1.5 text-xs font-medium transition-all disabled:opacity-50"
-                      style={{ background: 'var(--accent-blue)', color: '#fff' }}
+                      className="flex-1 rounded-lg py-1.5 text-xs font-semibold transition-all disabled:opacity-50"
+                      style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
                     >
                       {updateMutation.isPending ? '저장 중...' : '저장'}
                     </button>
@@ -175,7 +186,7 @@ export default function Navbar() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span>✏️</span>
+                  <Pencil size={15} strokeWidth={2} />
                   닉네임 변경
                 </button>
               )}
@@ -189,7 +200,7 @@ export default function Navbar() {
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                <span>⚙️</span>
+                <Settings size={15} strokeWidth={2} />
                 설정 (비상연락처)
               </Link>
 
@@ -202,7 +213,7 @@ export default function Navbar() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span>🚪</span>
+                  <LogOut size={15} strokeWidth={2} />
                   로그아웃
                 </button>
               </div>
@@ -217,15 +228,15 @@ export default function Navbar() {
         >
           <span
             className={`block w-5 h-0.5 transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}
-            style={{ background: 'var(--text-secondary)' }}
+            style={{ background: 'var(--ink-text-muted)' }}
           />
           <span
             className={`block w-5 h-0.5 transition-all ${menuOpen ? 'opacity-0' : ''}`}
-            style={{ background: 'var(--text-secondary)' }}
+            style={{ background: 'var(--ink-text-muted)' }}
           />
           <span
             className={`block w-5 h-0.5 transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}
-            style={{ background: 'var(--text-secondary)' }}
+            style={{ background: 'var(--ink-text-muted)' }}
           />
         </button>
       </nav>
@@ -233,53 +244,53 @@ export default function Navbar() {
       {/* 모바일 드롭다운 */}
       {menuOpen && (
         <div
-          className="sm:hidden fixed top-14 left-0 right-0 z-50 py-2"
-          style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}
+          className="sm:hidden fixed top-16 left-0 right-0 z-50 py-2"
+          style={{ background: 'var(--ink)', borderBottom: '1px solid var(--ink-border)' }}
         >
           {/* 프로필 */}
           <div
             className="px-4 py-3 mb-1"
-            style={{ borderBottom: '1px solid var(--border)' }}
+            style={{ borderBottom: '1px solid var(--ink-border)' }}
           >
             <div className="flex items-center gap-3">
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center font-medium"
-                style={{ background: 'var(--accent-blue)', color: '#fff' }}
+                className="w-9 h-9 rounded-full flex items-center justify-center font-semibold"
+                style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
               >
                 {nickname?.[0]?.toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm font-medium" style={{ color: 'var(--ink-text)' }}>
                   {nickname}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{email}</p>
+                <p className="text-xs" style={{ color: 'var(--ink-text-muted)' }}>{email}</p>
               </div>
             </div>
           </div>
 
-          {NAV_ITEMS.map(({ path, label, icon }) => (
+          {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
             <Link
               key={path}
               to={path}
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 text-sm transition-colors"
               style={{
-                color:      pathname === path ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                background: pathname === path ? 'rgba(79,126,248,0.08)' : 'transparent',
+                color:      pathname === path ? 'var(--accent-amber)' : 'var(--ink-text-muted)',
+                background: pathname === path ? 'var(--ink-2)' : 'transparent',
               }}
             >
-              <span>{icon}</span>
+              <Icon size={17} strokeWidth={2} />
               {label}
             </Link>
           ))}
 
-          <div style={{ borderTop: '1px solid var(--border)', marginTop: 4 }}>
+          <div style={{ borderTop: '1px solid var(--ink-border)', marginTop: 4 }}>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm mt-1"
               style={{ color: 'var(--accent-red)' }}
             >
-              <span>🚪</span>
+              <LogOut size={17} strokeWidth={2} />
               로그아웃
             </button>
           </div>
@@ -290,22 +301,31 @@ export default function Navbar() {
       <div
         className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex"
         style={{
-          background: 'var(--bg-secondary)',
-          borderTop: '1px solid var(--border)',
+          background: 'var(--ink)',
+          borderTop: '1px solid var(--ink-border)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        {NAV_ITEMS.map(({ path, label, icon }) => (
-          <Link
-            key={path}
-            to={path}
-            className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors"
-            style={{ color: pathname === path ? 'var(--accent-blue)' : 'var(--text-muted)' }}
-          >
-            <span style={{ fontSize: 18 }}>{icon}</span>
-            <span>{label}</span>
-          </Link>
-        ))}
+        {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+          const active = pathname === path
+          return (
+            <Link
+              key={path}
+              to={path}
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors relative"
+              style={{ color: active ? 'var(--accent-amber)' : 'var(--ink-text-muted)' }}
+            >
+              {active && (
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{ background: 'var(--accent-amber)' }}
+                />
+              )}
+              <Icon size={19} strokeWidth={2} />
+              <span>{label}</span>
+            </Link>
+          )
+        })}
       </div>
     </>
   )

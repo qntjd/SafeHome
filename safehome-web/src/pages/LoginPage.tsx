@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { useAuth } from '@/hooks/useAuth'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { Map, Footprints, Bell, Newspaper } from 'lucide-react'
 
 interface FormData { email: string; password: string }
 
@@ -19,32 +20,51 @@ export default function LoginPage() {
     }
   }
 
+  const inputStyle = {
+    background: 'var(--bg-hover)',
+    border: '1px solid var(--border)',
+    color: 'var(--text-primary)',
+  }
+
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--bg-primary)' }}>
-      {/* 왼쪽 블루 패널 (데스크탑) */}
+      {/* 왼쪽 잉크 히어로 패널 (데스크탑) */}
       <div
-        className="hidden sm:flex flex-col justify-center items-center flex-1 px-12"
-        style={{ background: 'var(--accent-blue)' }}
+        className="hidden sm:flex flex-col justify-center items-center flex-1 px-12 relative overflow-hidden"
+        style={{ background: 'var(--ink)' }}
       >
-        <div className="max-w-sm text-center">
-          <div className="w-16 h-16 rounded-2xl bg-white mx-auto mb-6 flex items-center justify-center">
-            <span style={{ color: 'var(--accent-blue)', fontSize: 28, fontWeight: 700 }}>S</span>
+        <div
+          className="absolute rounded-full"
+          style={{ width: 340, height: 340, left: -100, top: -140, background: 'radial-gradient(circle, rgba(232,163,61,0.16) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{ width: 260, height: 260, right: -80, bottom: -120, background: 'radial-gradient(circle, rgba(11,110,130,0.22) 0%, transparent 70%)' }}
+        />
+        <div className="max-w-sm text-center relative">
+          <div
+            className="w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center relative"
+            style={{ background: 'var(--accent-amber)', boxShadow: 'var(--shadow-beacon)' }}
+          >
+            <span className="beacon-dot beacon-dot--static" style={{ position: 'absolute', top: -3, right: -3, background: 'var(--grade-a)', boxShadow: '0 0 0 3px var(--ink)' }} />
+            <span className="font-display font-black" style={{ color: 'var(--ink)', fontSize: 28 }}>S</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-3">SafeHome</h1>
-          <p className="text-base" style={{ color: 'rgba(255,255,255,0.75)' }}>
+          <h1 className="font-display font-black text-3xl mb-3" style={{ color: 'var(--ink-text)' }}>SafeHome</h1>
+          <p className="text-base flex items-center justify-center gap-2" style={{ color: 'var(--ink-text-muted)' }}>
+            <span className="beacon-dot" />
             1인 가구를 위한 안심 생활 플랫폼
           </p>
           <div className="mt-10 flex flex-col gap-3 text-left">
             {[
-              { icon: '🗺', text: '동네 안전점수 지도' },
-              { icon: '🚶', text: '안심 귀가 & 워치독' },
-              { icon: '🔔', text: '실시간 재난 알림' },
-              { icon: '📰', text: '안전 뉴스 피드' },
-            ].map(({ icon, text }) => (
+              { icon: Map, text: '동네 안전점수 지도' },
+              { icon: Footprints, text: '안심 귀가 & 워치독' },
+              { icon: Bell, text: '실시간 재난 알림' },
+              { icon: Newspaper, text: '안전 뉴스 피드' },
+            ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.12)' }}>
-                <span className="text-lg">{icon}</span>
-                <span className="text-sm text-white font-medium">{text}</span>
+                style={{ background: 'var(--ink-2)', border: '1px solid var(--ink-border)' }}>
+                <Icon size={18} strokeWidth={2} color="var(--accent-amber)" />
+                <span className="text-sm font-medium" style={{ color: 'var(--ink-text)' }}>{text}</span>
               </div>
             ))}
           </div>
@@ -53,16 +73,16 @@ export default function LoginPage() {
 
       {/* 오른쪽 로그인 폼 */}
       <div className="flex-1 sm:max-w-md flex flex-col justify-center px-6 sm:px-12"
-        style={{ background: 'white' }}>
+        style={{ background: 'var(--bg-card)' }}>
         <div className="sm:hidden text-center mb-8">
           <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
-            style={{ background: 'var(--accent-blue)' }}>
-            <span className="text-white font-bold text-lg">S</span>
+            style={{ background: 'var(--accent-amber)' }}>
+            <span className="font-display font-black text-lg" style={{ color: 'var(--ink)' }}>S</span>
           </div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>SafeHome</h1>
+          <h1 className="font-display font-extrabold text-xl" style={{ color: 'var(--text-primary)' }}>SafeHome</h1>
         </div>
 
-        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>로그인</h2>
+        <h2 className="font-display font-black text-2xl mb-2" style={{ color: 'var(--text-primary)' }}>로그인</h2>
         <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
           계정에 로그인하여 서비스를 이용하세요
         </p>
@@ -74,12 +94,8 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="email@example.com"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500"
-              style={{
-                background: 'var(--bg-hover)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-              }}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--accent-amber)]"
+              style={inputStyle}
               {...register('email', { required: '이메일을 입력해주세요.' })}
             />
 
@@ -96,13 +112,8 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="••••••••"
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{
-                border: '1.5px solid var(--border)',
-                color: 'var(--text-primary)',
-                background: 'white',
-              }}
-      
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--accent-amber)]"
+              style={inputStyle}
               {...register('password', { required: '비밀번호를 입력해주세요.' })}
             />
             {errors.password && (
@@ -114,7 +125,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="rounded-xl px-4 py-3 text-sm"
-              style={{ background: '#fef2f2', color: 'var(--accent-red)', border: '1px solid #fecaca' }}>
+              style={{ background: 'var(--accent-red-soft)', color: 'var(--accent-red)' }}>
               {error}
             </div>
           )}
@@ -122,8 +133,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl py-3 text-sm font-semibold transition-all disabled:opacity-60 mt-2"
-            style={{ background: 'var(--accent-blue)', color: 'white' }}
+            className="w-full rounded-xl py-3 text-sm font-display font-bold transition-all disabled:opacity-60 mt-2"
+            style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
           >
             {isSubmitting ? '로그인 중...' : '로그인'}
           </button>
@@ -143,7 +154,7 @@ export default function LoginPage() {
         </div>
 
         {/* 구글 로그인 버튼 */}
-          <a
+        <a
           href="/oauth2/authorization/google"
           className="flex items-center justify-center gap-3 w-full rounded-xl py-3 text-sm font-medium transition-all"
           style={{
@@ -160,7 +171,7 @@ export default function LoginPage() {
           </svg>
           Google로 로그인
         </a>
-            </div>
       </div>
+    </div>
   )
 }

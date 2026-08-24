@@ -25,6 +25,24 @@ public class SafetyDto {
             String districtName
     ) {}
 
+    // 최단 경로 vs 안전 경로(안전시설 밀집 경유지를 도는 경로) 비교
+    public record RouteOption(
+            String type,               // "DIRECT" | "SAFE"
+            String label,              // "최단 경로" | "안전 경로"
+            List<RoutePoint> path,     // 경로를 그리는 좌표(2~3개 — 출발/경유/도착)
+            List<RoutePoint> safePoints,
+            int totalCctv,
+            int totalBell,
+            int totalPolice,
+            double safetyScore,
+            double extraDistanceRatio  // 최단 경로 대비 추가로 더 걷는 비율(0.15 = 15% 더 걸음)
+    ) {}
+
+    public record RouteCompareResponse(
+            RouteOption direct,
+            RouteOption safe
+    ) {}
+
     public record NearbyDangerResponse(
         int cctvCount,
         int bellCount,

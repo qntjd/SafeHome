@@ -1,6 +1,7 @@
 import requests
 from config import API_KEY
 from db import get_connection, upsert_crime_stat
+from region_codes import REGION_CODE_MAP
 
 # 연도별 API 엔드포인트
 CRIME_API_URLS = {
@@ -11,14 +12,33 @@ CRIME_API_URLS = {
     2024: "https://api.odcloud.kr/api/3074462/v1/uddi:ae109087-8690-4cb5-bda9-a7876a92f3b8",
 }
 
-# 시도 약칭 → (시도코드, 시도명)
-SIDO_MAP = {
-    "서울": ("11", "서울"), "부산": ("21", "부산"), "대구": ("22", "대구"),
-    "인천": ("23", "인천"), "광주": ("24", "광주"), "대전": ("25", "대전"),
-    "울산": ("26", "울산"), "세종": ("36", "세종"), "경기": ("31", "경기"),
-    "강원": ("32", "강원"), "충북": ("33", "충북"), "충남": ("34", "충남"),
-    "전북": ("35", "전북"), "전남": ("46", "전남"), "경북": ("47", "경북"),
-    "경남": ("48", "경남"), "제주": ("50", "제주"),
+# 범죄통계 API 컬럼명의 실제 접두어(대부분 약칭이지만 강원도/경기도/세종시는 접미사가 붙어서 나온다)
+# → region_mapper.py가 쓰는 정식 시/도명 (REGION_CODE_MAP이 "정식시도명 + 시군구명" 키라서 매칭에 필요)
+PREFIX_TO_FULL_SIDO = {
+    "서울": "서울특별시",     "부산": "부산광역시",     "대구": "대구광역시",
+    "인천": "인천광역시",     "광주": "광주광역시",     "대전": "대전광역시",
+    "울산": "울산광역시",     "세종시": "세종특별자치시", "경기도": "경기도",
+    "강원도": "강원특별자치도", "충북": "충청북도",       "충남": "충청남도",
+    "전북": "전북특별자치도",  "전남": "전라남도",       "경북": "경상북도",
+    "경남": "경상남도",       "제주": "제주특별자치도",
+}
+
+# 화면에 보여줄 때 쓰는 짧은 시/도명(접미사 없이 통일)
+PREFIX_DISPLAY_NAME = {
+    "서울": "서울", "부산": "부산", "대구": "대구", "인천": "인천", "광주": "광주",
+    "대전": "대전", "울산": "울산", "세종시": "세종", "경기도": "경기", "강원도": "강원",
+    "충북": "충북", "충남": "충남", "전북": "전북", "전남": "전남", "경북": "경북",
+    "경남": "경남", "제주": "제주",
+}
+
+# 시/군/구 매칭이 안 될 때(세종처럼 하위 구역이 없거나, 일부 지역은 정부 API 조회 실패)
+# 시/도 단위로라도 집계할 수 있도록 쓰는 법정동 표준 시/도 코드(2자리) — 실제 시/군/구
+# 코드의 앞 2자리와 동일한 체계라 프론트에서 시/도 ↔ 시/군/구를 묶어 보여줄 때 그대로 맞아떨어진다.
+SIDO_CODE = {
+    "서울": "11", "부산": "26", "대구": "27", "인천": "28", "광주": "29",
+    "대전": "30", "울산": "31", "세종시": "36", "경기도": "41", "강원도": "42",
+    "충북": "43", "충남": "44", "전북": "45", "전남": "46", "경북": "47",
+    "경남": "48", "제주": "50",
 }
 
 CRIME_TYPE_MAP = {
@@ -40,11 +60,24 @@ CRIME_TYPE_MAP = {
 }
 
 
-def match_sido(key: str):
-    """컬럼명에 시/도 이름이 포함되어 있으면 매칭 (공백 유무, '도/시' 접미사 무관)"""
-    for sido, info in SIDO_MAP.items():
-        if key.startswith(sido):
-            return info
+def match_region(key: str):
+    """컬럼명("대구 남구", "경기도 가평군" 등)을 시/군/구 단위 실제 법정동코드로, 안되면 시/도 코드로 매칭"""
+    for prefix, full_sido in PREFIX_TO_FULL_SIDO.items():
+        if not key.startswith(prefix):
+            continue
+
+        display_sido  = PREFIX_DISPLAY_NAME[prefix]
+        sigungu_name  = key[len(prefix):].strip()
+
+        if sigungu_name:
+            lookup_key = f"{full_sido}{sigungu_name}"
+            code = REGION_CODE_MAP.get(lookup_key)
+            if code:
+                return code, f"{display_sido} {sigungu_name}"
+
+        # 시/군/구 매칭 실패(세종처럼 하위구역이 없거나, 코드 매핑 누락) → 시/도 단위로 집계
+        return SIDO_CODE[prefix], display_sido
+
     return None
 
 
@@ -67,9 +100,8 @@ def collect_year(conn, year: int, api_url: str) -> int:
     total = 0
     page = 1
 
-    district_counts: dict[str, dict[str, int]] = {
-        code: {} for code, _ in SIDO_MAP.values()
-    }
+    # district_code -> (district_name, {crime_type: count})
+    district_counts: dict[str, tuple[str, dict[str, int]]] = {}
 
     while True:
         try:
@@ -95,10 +127,10 @@ def collect_year(conn, year: int, api_url: str) -> int:
                 for key, value in item.items():
                     if key in ("범죄대분류", "범죄중분류"):
                         continue
-                    sido_info = match_sido(key)
-                    if not sido_info:
+                    matched = match_region(key)
+                    if not matched:
                         continue
-                    district_code, _ = sido_info
+                    district_code, district_name = matched
 
                     count = value or 0
                     try:
@@ -106,9 +138,10 @@ def collect_year(conn, year: int, api_url: str) -> int:
                     except (ValueError, TypeError):
                         count = 0
 
-                    if crime_type not in district_counts[district_code]:
-                        district_counts[district_code][crime_type] = 0
-                    district_counts[district_code][crime_type] += count
+                    if district_code not in district_counts:
+                        district_counts[district_code] = (district_name, {})
+                    _, crime_map = district_counts[district_code]
+                    crime_map[crime_type] = crime_map.get(crime_type, 0) + count
 
             total_count = data.get("totalCount", 0)
 
@@ -120,13 +153,14 @@ def collect_year(conn, year: int, api_url: str) -> int:
             print(f"[범죄통계] {year}년 수집 실패 (페이지 {page}): {e}")
             break
 
-    for district_code, crime_map in district_counts.items():
+    for district_code, (district_name, crime_map) in district_counts.items():
         for crime_type, count in crime_map.items():
             if count == 0:
                 continue
             upsert_crime_stat(
                 conn=conn,
                 district_code=district_code,
+                district_name=district_name,
                 year=year,
                 month=0,
                 crime_type=crime_type,

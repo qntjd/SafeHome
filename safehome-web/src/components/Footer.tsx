@@ -1,24 +1,24 @@
 export default function Footer() {
   return (
-    <footer style={{ background: '#dbe2eb', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <footer style={{ background: 'var(--ink)', borderTop: '1px solid var(--ink-border)' }}>
       {/* 상단 */}
-      <div className="px-6 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row gap-6 sm:gap-0 justify-between">
+      <div className="px-6 py-8" style={{ borderBottom: '1px solid var(--ink-border)' }}>
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row gap-8 sm:gap-0 justify-between">
 
           {/* 로고 & 소개 */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 mb-1">
               <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
-                style={{ background: 'var(--accent-blue)' }}
+                className="w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: 'var(--accent-amber)' }}
               >
-                S
+                <span className="font-display font-black text-sm" style={{ color: 'var(--ink)' }}>S</span>
               </div>
-              <span className="font-semibold text-sm" style={{ color: '#e2e8f0' }}>
+              <span className="font-display font-extrabold text-sm tracking-tight" style={{ color: 'var(--ink-text)' }}>
                 SafeHome
               </span>
             </div>
-            <p className="text-xs leading-relaxed" style={{ color: '#64748b', maxWidth: 280 }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--ink-text-muted)', maxWidth: 280 }}>
               1인 가구를 위한 안심 생활 플랫폼으로<br />
               실시간 안전정보와 귀가 안심 서비스를 제공합니다.
             </p>
@@ -26,7 +26,7 @@ export default function Footer() {
 
           {/* 데이터 출처 */}
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>데이터 출처</p>
+            <p className="text-xs font-semibold mb-1" style={{ color: 'var(--ink-text)' }}>데이터 출처</p>
             {[
               { label: '경찰청',              desc: '범죄 발생 지역별 통계' },
               { label: '행정안전부',           desc: 'CCTV·비상벨 위치 정보' },
@@ -34,9 +34,9 @@ export default function Footer() {
               { label: '네이버',              desc: '안전 뉴스 검색' },
             ].map(({ label, desc }) => (
               <div key={label} className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full" style={{ background: '#475569' }} />
-                <span className="text-xs" style={{ color: '#64748b' }}>
-                  <span style={{ color: '#94a3b8' }}>{label}</span> · {desc}
+                <span className="beacon-dot beacon-dot--static" style={{ width: 4, height: 4 }} />
+                <span className="text-xs" style={{ color: 'var(--ink-text-muted)' }}>
+                  <span style={{ color: 'var(--ink-text)' }}>{label}</span> · {desc}
                 </span>
               </div>
             ))}
@@ -44,7 +44,7 @@ export default function Footer() {
 
           {/* 관련 사이트 */}
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>관련 사이트</p>
+            <p className="text-xs font-semibold mb-1" style={{ color: 'var(--ink-text)' }}>관련 사이트</p>
             {[
               { label: '공공데이터포털', url: 'https://www.data.go.kr' },
               { label: '경찰청',        url: 'https://www.police.go.kr' },
@@ -57,9 +57,9 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs transition-colors"
-                style={{ color: '#64748b' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#94a3b8')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
+                style={{ color: 'var(--ink-text-muted)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-amber)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-text-muted)')}
               >
                 {label} →
               </a>
@@ -71,10 +71,10 @@ export default function Footer() {
       {/* 하단 — 저작권 & 면책 */}
       <div className="px-6 py-4">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs" style={{ color: '#334155' }}>
-            © 2026 SafeHome. All rights reserved.
+          <p className="text-xs font-mono" style={{ color: 'var(--ink-text-muted)' }}>
+            © 2026 SafeHome
           </p>
-          <p className="text-xs text-center" style={{ color: '#334155' }}>
+          <p className="text-xs text-center" style={{ color: 'var(--ink-text-muted)' }}>
             본 시스템의 안전점수 및 범죄통계는 경찰청·행정안전부 공공데이터를 기반으로 산출되며, 실제 치안 상황과 다를 수 있습니다.
           </p>
         </div>

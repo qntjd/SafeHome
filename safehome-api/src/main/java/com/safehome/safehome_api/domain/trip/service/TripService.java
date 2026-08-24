@@ -78,6 +78,15 @@ public class TripService {
         trip.cancel();
     }
 
+    // 새로고침 등으로 프론트 상태가 날아가도 진행 중인 귀가를 다시 불러올 수 있게 하는 조회
+    @Transactional(readOnly = true)
+    public TripDto.TripResponse getActiveTrip(String email) {
+        User user = findUser(email);
+        return tripRepository.findByUserIdAndStatus(user.getId(), SafeTrip.TripStatus.IN_PROGRESS)
+                .map(TripDto.TripResponse::from)
+                .orElse(null);
+    }
+
     // ── 내부 헬퍼 ──────────────────────────────────────
 
     private User findUser(String email) {

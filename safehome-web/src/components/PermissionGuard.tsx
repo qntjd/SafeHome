@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { usePermissions } from '@/hooks/usePermissions'
+import { MapPin, Bell } from 'lucide-react'
 
 interface Props {
   children: React.ReactNode
@@ -35,20 +36,20 @@ export default function PermissionGuard({ children }: Props) {
       style={{ background: 'var(--bg-primary)' }}
     >
       <div
-        className="fixed top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: 'var(--accent-blue)' }}
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: 'var(--accent-amber)' }}
       />
 
       <div className="w-full max-w-sm relative">
         {/* 로고 */}
         <div className="text-center mb-8">
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-4"
-            style={{ background: 'var(--accent-blue)' }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'var(--accent-amber)', boxShadow: 'var(--shadow-beacon)' }}
           >
-            S
+            <span className="font-display font-black text-2xl" style={{ color: 'var(--ink)' }}>S</span>
           </div>
-          <h1 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="font-display font-black text-xl mb-1" style={{ color: 'var(--text-primary)' }}>
             SafeHome 시작하기
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -59,15 +60,15 @@ export default function PermissionGuard({ children }: Props) {
         {/* 권한 카드 */}
         <div
           className="rounded-2xl p-5 mb-4 flex flex-col gap-4"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
         >
           {/* 위치 권한 */}
           <div className="flex items-start gap-4">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg"
-              style={{ background: 'rgba(79,126,248,0.15)' }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'var(--bg-blue-soft)' }}
             >
-              📍
+              <MapPin size={18} strokeWidth={2} color="var(--accent-blue)" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-0.5">
@@ -87,10 +88,10 @@ export default function PermissionGuard({ children }: Props) {
           {/* 알림 권한 */}
           <div className="flex items-start gap-4">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg"
-              style={{ background: 'rgba(251,191,36,0.15)' }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'var(--accent-amber-soft)' }}
             >
-              🔔
+              <Bell size={18} strokeWidth={2} color="var(--accent-amber-deep)" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-0.5">
@@ -116,8 +117,8 @@ export default function PermissionGuard({ children }: Props) {
         <button
           onClick={handleAllow}
           disabled={loading}
-          className="w-full rounded-xl py-3 text-sm font-medium transition-all disabled:opacity-50 mb-3"
-          style={{ background: 'var(--accent-blue)', color: '#fff' }}
+          className="w-full rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-50 mb-3"
+          style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
         >
           {loading ? '권한 요청 중...' : '권한 허용하고 시작하기'}
         </button>
@@ -137,9 +138,9 @@ export default function PermissionGuard({ children }: Props) {
 function StatusBadge({ status }: { status: string }) {
   const config = {
     idle:       { label: '대기',   color: 'var(--text-muted)',   bg: 'var(--bg-hover)' },
-    requesting: { label: '요청중', color: 'var(--accent-amber)', bg: 'rgba(251,191,36,0.1)' },
-    granted:    { label: '허용됨', color: 'var(--accent-green)', bg: 'rgba(52,211,153,0.1)' },
-    denied:     { label: '거부됨', color: 'var(--accent-red)',   bg: 'rgba(248,113,113,0.1)' },
+    requesting: { label: '요청중', color: 'var(--accent-amber)', bg: 'var(--accent-amber-soft)' },
+    granted:    { label: '허용됨', color: 'var(--accent-green)', bg: 'var(--grade-a-bg)' },
+    denied:     { label: '거부됨', color: 'var(--accent-red)',   bg: 'var(--accent-red-soft)' },
   }
   const cfg = config[status as keyof typeof config] ?? config.idle
 

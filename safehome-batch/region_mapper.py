@@ -37,10 +37,11 @@ def fetch_sigungu_list(sido_name: str) -> list[dict]:
             # 시/군/구 단위만 (읍면동, 리 코드가 모두 000인 경우)
             if row.get("umd_cd") == "000" and row.get("ri_cd") == "00":
                 addr = row.get("locatadd_nm", "")
-                # "대구광역시 남구" 형태에서 시군구명만 추출
+                # "대구광역시 남구" → "남구", "경기도 고양시 덕양구" → "고양시덕양구"
+                # (시+구 합쳐진 지역은 parts[1:]를 공백 없이 이어붙여야 범죄통계 API 컬럼명과 일치함)
                 parts = addr.split(" ")
                 if len(parts) >= 2:
-                    sigungu_name = parts[1]
+                    sigungu_name = "".join(parts[1:])
                     result.append({
                         "code": row.get("region_cd"),
                         "sido": sido_name,

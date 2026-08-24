@@ -32,6 +32,9 @@ export interface ShareLocationResponse {
 }
 
 export const tripApi = {
+  getActive: () =>
+    api.get<{ data: TripResponse | null }>('/trips/active'),
+
   start: (data: StartTripRequest) =>
     api.post<{ data: TripResponse }>('/trips', data),
 

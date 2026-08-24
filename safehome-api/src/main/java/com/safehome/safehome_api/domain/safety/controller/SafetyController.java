@@ -53,6 +53,17 @@ public class SafetyController {
         return ApiResponse.success(safetyService.getSafeRoute(startLat, startLng, endLat, endLng));
     }
 
+    @Operation(summary = "최단 경로 vs 안전 경로 비교")
+    @GetMapping("/route-compare")
+    public ApiResponse<SafetyDto.RouteCompareResponse> getRouteCompare(
+            @RequestParam double startLat,
+            @RequestParam double startLng,
+            @RequestParam double endLat,
+            @RequestParam double endLng
+    ) {
+        return ApiResponse.success(safetyService.getRouteCompare(startLat, startLng, endLat, endLng));
+    }
+
     @Operation(summary = "주변 범죄 위험도 조회")
     @GetMapping("/nearby-danger")
     public ApiResponse<SafetyDto.NearbyDangerResponse> getNearbyDanger(

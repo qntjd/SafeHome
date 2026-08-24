@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { Users, MapPin, Bell } from 'lucide-react'
 import { contactApi } from '@/api/contact'
 import { alertApi } from '@/api/alert'
 import type { CreateContactRequest } from '@/api/contact'
@@ -20,9 +21,9 @@ const SIDO_LIST = [
 ]
 
 const LEVEL_CONFIG = {
-  INFO:    { color: 'var(--accent-blue)',  bg: 'rgba(79,126,248,0.1)',  label: '일반' },
-  WARNING: { color: 'var(--accent-amber)', bg: 'rgba(251,191,36,0.1)',  label: '주의' },
-  DANGER:  { color: 'var(--accent-red)',   bg: 'rgba(248,113,113,0.1)', label: '위험' },
+  INFO:    { color: 'var(--accent-blue)',  bg: 'var(--bg-blue-soft)',     label: '일반' },
+  WARNING: { color: 'var(--accent-amber)', bg: 'var(--accent-amber-soft)', label: '주의' },
+  DANGER:  { color: 'var(--accent-red)',   bg: 'var(--accent-red-soft)',   label: '위험' },
 }
 
 export default function SettingsPage() {
@@ -125,7 +126,7 @@ export default function SettingsPage() {
   const cardStyle = {
     background:   'var(--bg-card)',
     border:       '1px solid var(--border)',
-    borderRadius: 16,
+    borderRadius: 'var(--radius-lg)',
     padding:      '1.25rem',
   }
 
@@ -134,7 +135,7 @@ export default function SettingsPage() {
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 pb-24 sm:pb-8 flex flex-col gap-6">
 
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold mb-1"
+          <h1 className="font-display font-black text-xl sm:text-2xl mb-1"
             style={{ color: 'var(--text-primary)' }}>설정</h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             비상연락처 및 알림 설정
@@ -145,7 +146,7 @@ export default function SettingsPage() {
         <div style={cardStyle}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="font-display font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                 비상연락처
               </h2>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
@@ -227,7 +228,7 @@ export default function SettingsPage() {
             </div>
           ) : contacts.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-2xl mb-2">👥</p>
+              <Users size={26} strokeWidth={1.75} color="var(--text-muted)" className="mx-auto mb-2" />
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>등록된 비상연락처가 없어요</p>
             </div>
           ) : (
@@ -241,13 +242,13 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
-                      style={{ background: 'rgba(79,126,248,0.15)', color: 'var(--accent-blue)' }}
+                      style={{ background: 'var(--bg-blue-soft)', color: 'var(--accent-blue)' }}
                     >
                       {contact.name[0]}
                     </div>
                     <div>
                       <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{contact.name}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                         {contact.phone} · {contact.notifyAfterMin}분 후 알림
                       </p>
                     </div>
@@ -256,7 +257,7 @@ export default function SettingsPage() {
                     onClick={() => deleteContactMutation.mutate(contact.id)}
                     disabled={deleteContactMutation.isPending}
                     className="text-xs px-3 py-1 rounded-lg transition-colors"
-                    style={{ color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.3)' }}
+                    style={{ color: 'var(--accent-red)', border: '1px solid var(--accent-red-soft)' }}
                   >
                     삭제
                   </button>
@@ -268,7 +269,7 @@ export default function SettingsPage() {
 
         {/* ── 알림 구독 ── */}
         <div style={cardStyle}>
-          <h2 className="font-medium text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
+          <h2 className="font-display font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
             재난·범죄 알림 구독
           </h2>
           <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
@@ -279,10 +280,17 @@ export default function SettingsPage() {
           <button
             onClick={handleMyLocationSubscribe}
             disabled={subscribeMutation.isPending}
-            className="w-full rounded-xl py-2.5 text-sm font-medium transition-all disabled:opacity-50 mb-3"
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-medium transition-all disabled:opacity-50 mb-3"
             style={{ background: 'var(--accent-blue)', color: '#fff' }}
           >
-            {subscribeMutation.isPending ? '등록 중...' : '📍 현재 위치로 내 지역 등록'}
+            {subscribeMutation.isPending ? (
+              '등록 중...'
+            ) : (
+              <>
+                <MapPin size={15} strokeWidth={2} />
+                현재 위치로 내 지역 등록
+              </>
+            )}
           </button>
 
           {/* 직접 지역 선택 */}
@@ -345,15 +353,16 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-3 mb-4">
               {subscriptions.filter(s => s.isMyLocation).length > 0 && (
                 <div>
-                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--accent-blue)' }}>
-                    📍 내 지역
+                  <p className="text-xs font-medium mb-2 flex items-center gap-1.5" style={{ color: 'var(--accent-blue)' }}>
+                    <span className="beacon-dot beacon-dot--static" />
+                    내 지역
                   </p>
                   <div className="flex flex-col gap-2">
                     {subscriptions.filter(s => s.isMyLocation).map((sub) => (
                       <div
                         key={sub.id}
                         className="flex items-center justify-between px-3 py-2.5 rounded-xl"
-                        style={{ background: 'rgba(79,126,248,0.08)', border: '1px solid rgba(79,126,248,0.2)' }}
+                        style={{ background: 'var(--bg-blue-soft)', border: '1px solid var(--accent-blue-light)' }}
                       >
                         <div>
                           <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -366,7 +375,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => unsubscribeMutation.mutate(sub.id)}
                           className="text-xs px-3 py-1 rounded-lg"
-                          style={{ color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.3)' }}
+                          style={{ color: 'var(--accent-red)', border: '1px solid var(--accent-red-soft)' }}
                         >
                           해제
                         </button>
@@ -378,8 +387,9 @@ export default function SettingsPage() {
 
               {subscriptions.filter(s => !s.isMyLocation).length > 0 && (
                 <div>
-                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                    🔔 관심 지역
+                  <p className="text-xs font-medium mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                    <Bell size={13} strokeWidth={2} />
+                    관심 지역
                   </p>
                   <div className="flex flex-col gap-2">
                     {subscriptions.filter(s => !s.isMyLocation).map((sub) => (
@@ -399,7 +409,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => unsubscribeMutation.mutate(sub.id)}
                           className="text-xs px-3 py-1 rounded-lg"
-                          style={{ color: 'var(--accent-red)', border: '1px solid rgba(248,113,113,0.3)' }}
+                          style={{ color: 'var(--accent-red)', border: '1px solid var(--accent-red-soft)' }}
                         >
                           해제
                         </button>
@@ -445,13 +455,13 @@ export default function SettingsPage() {
                     <div
                       key={alert.id}
                       className="rounded-xl p-3"
-                      style={{ background: cfg.bg, border: `1px solid ${cfg.color}30` }}
+                      style={{ background: cfg.bg, border: `1px solid ${cfg.color}` }}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-semibold" style={{ color: cfg.color }}>
                           {alert.districtName} · {cfg.label}
                         </span>
-                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                           {new Date(alert.issuedAt).toLocaleString('ko-KR')}
                         </span>
                       </div>

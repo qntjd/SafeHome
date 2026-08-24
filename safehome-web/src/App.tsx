@@ -14,6 +14,7 @@ import SettingsPage from '@/pages/SettingsPage'
 import CrimeStatsPage from '@/pages/CrimeStatsPage'
 import SafetyResourcesPage from './pages/SafetyResourcesPage'
 import ShareLocationPage from './pages/ShareLocationPage'
+import HomeChecklistPage from './pages/HomeChecklistPage'
 
 const queryClient = new QueryClient()
 
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/crime" element={<CrimeStatsPage />} />
               <Route path="/resources" element={<SafetyResourcesPage />} />
+              <Route path="/checklist" element={<HomeChecklistPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" />} />

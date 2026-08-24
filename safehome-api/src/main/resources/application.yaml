@@ -63,3 +63,8 @@ public-api:
     key: ${DISASTER_API_KEY:YOUR_API_KEY}
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+aligo:
+  api-key: ${ALIGO_API_KEY:}
+  user-id: ${ALIGO_USER_ID:}
+  sender: ${ALIGO_SENDER:}

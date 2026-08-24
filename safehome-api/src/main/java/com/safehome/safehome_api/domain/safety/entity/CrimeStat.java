@@ -22,6 +22,8 @@ public class CrimeStat {
     @Column(nullable = false)
     private String districtCode;
 
+    private String districtName;
+
     @Column(nullable = false)
     private Integer year;
 

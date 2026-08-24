@@ -1,9 +1,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Map, MapMarker } from 'react-kakao-maps-sdk'
+import { Map, MapMarker, Polyline } from 'react-kakao-maps-sdk'
+import {
+  Home, Briefcase, School, MapPin, CheckCircle2, AlertTriangle, Siren,
+  Camera, Bell, ShieldAlert, Moon, Link2, X, Star, Map as MapIcon, Footprints,
+} from 'lucide-react'
 import { tripApi } from '@/api/trip'
 import { placeApi } from '@/api/place'
-import { safetyApi, type SafeRouteResponse } from '@/api/safety'
+import { safetyApi, type RouteCompareResponse } from '@/api/safety'
 import type { TripResponse } from '@/api/trip'
 import type { FavoritePlace } from '@/api/place'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
@@ -19,10 +23,10 @@ interface Place {
 }
 
 const PLACE_TYPE_CONFIG = {
-  HOME:   { icon: '🏠', label: '집' },
-  WORK:   { icon: '💼', label: '직장' },
-  SCHOOL: { icon: '🏫', label: '학교' },
-  CUSTOM: { icon: '📍', label: '즐겨찾기' },
+  HOME:   { icon: Home,      label: '집' },
+  WORK:   { icon: Briefcase, label: '직장' },
+  SCHOOL: { icon: School,    label: '학교' },
+  CUSTOM: { icon: MapPin,    label: '즐겨찾기' },
 }
 
 export default function TripPage() {
@@ -37,10 +41,21 @@ export default function TripPage() {
   const [favoriteLabel, setFavoriteLabel]       = useState('')
   const [isNightMode, setIsNightMode]           = useState(false)
 
-  const [safeRoute, setSafeRoute] = useState<SafeRouteResponse | null>(null)
+  const [routeCompare, setRouteCompare] = useState<RouteCompareResponse | null>(null)
+  const [selectedRouteType, setSelectedRouteType] = useState<'DIRECT' | 'SAFE' | null>(null)
   const [loadingRoute, setLoadingRoute] = useState(false)
+  const [routeError, setRouteError] = useState<string | null>(null)
   const [nearbyDanger, setNearbyDanger] = useState<NearbyDangerResponse | null>(null)
   const [dangerAlert, setDangerAlert]   = useState(false)
+
+  // 새로고침해도 진행 중인 귀가를 잃어버리지 않도록 마운트 시 서버에서 복원
+  const { data: activeTripData } = useQuery({
+    queryKey: ['active-trip'],
+    queryFn: () => tripApi.getActive(),
+  })
+  useEffect(() => {
+    if (activeTripData?.data?.data) setActiveTrip(activeTripData.data.data)
+  }, [activeTripData])
 
   // 야간 모드 자동 전환 (오후 11시 ~ 오전 6시)
   useEffect(() => {
@@ -53,21 +68,35 @@ export default function TripPage() {
     return () => clearInterval(timer)
   }, [])
 
-// 목적지 선택 시 안전 경로 분석
+// 목적지 선택 시 최단 경로 vs 안전 경로 비교 — 매번 다시 직접 골라야 시작 버튼이 활성화된다
   useEffect(() => {
+  setSelectedRouteType(null)
+  setRouteError(null)
   if (!selectedPlace) {
-    setSafeRoute(null)
+    setRouteCompare(null)
     return
   }
   setLoadingRoute(true)
-  safetyApi.getSafeRoute(
+  safetyApi.getRouteCompare(
     position.lat, position.lng,
     selectedPlace.lat, selectedPlace.lng
   )
-  .then(({ data }) => setSafeRoute(data.data))
-  .catch(() => setSafeRoute(null))
+  .then(({ data }) => setRouteCompare(data.data))
+  .catch((e) => {
+    setRouteCompare(null)
+    console.error('[경로 비교] 조회 실패', e)
+    setRouteError(
+      e?.response?.status === 401 || e?.response?.status === 403
+        ? '로그인이 필요해요. 다시 로그인해주세요.'
+        : '경로 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'
+    )
+  })
   .finally(() => setLoadingRoute(false))
 }, [selectedPlace])
+
+  const activeRoute = routeCompare
+    ? (selectedRouteType === 'DIRECT' ? routeCompare.direct : routeCompare.safe)
+    : null
 
   // 귀가 중 주변 위험 감지
   useEffect(() => {
@@ -103,16 +132,11 @@ export default function TripPage() {
   const favorites = favoritesData?.data?.data ?? []
 
   // 귀가 중 주변 시설 
-  const { data: facilitiesData } = useQuery({
-    queryKey: ['trip-facilities', position],
-    queryFn:  () => safetyApi.getFacilities(position.lat, position.lng, 500),
-    enabled:  !!activeTrip && activeTrip.status === 'IN_PROGRESS',
-    refetchInterval: 30_000, 
-  })
-  const facilities = facilitiesData?.data?.data ?? []
-  const cctvCount  = facilities.filter(f => f.type === 'CCTV').length
-  const bellCount  = facilities.filter(f => f.type === 'EMERGENCY_BELL').length
-  const policeCount = facilities.filter(f => f.type === 'POLICE').length
+  // 지도 마커 목록 API는 트래픽 최적화를 위해 300개로 잘리므로,
+  // 실제 개수는 위 위험 감지에서 이미 폴링 중인 nearbyDanger(DB COUNT 기반)를 그대로 쓴다.
+  const cctvCount    = nearbyDanger?.cctvCount ?? 0
+  const bellCount    = nearbyDanger?.bellCount ?? 0
+  const policeCount  = nearbyDanger?.policeCount ?? 0
 
   const addFavoriteMutation = useMutation({
     mutationFn: () => placeApi.addPlace({
@@ -216,21 +240,24 @@ export default function TripPage() {
               className="absolute top-3 right-3 left-3 rounded-xl px-4 py-3 z-10 transition-all"
               style={{
                 background: nearbyDanger.dangerLevel === 'SAFE'
-                  ? 'rgba(52,211,153,0.15)' : nearbyDanger.dangerLevel === 'CAUTION'
-                  ? 'rgba(251,191,36,0.15)' : 'rgba(248,113,113,0.15)',
+                  ? 'rgba(30,138,110,0.15)' : nearbyDanger.dangerLevel === 'CAUTION'
+                  ? 'rgba(232,163,61,0.15)' : 'rgba(215,38,61,0.15)',
                 border: `1px solid ${
-                  nearbyDanger.dangerLevel === 'SAFE'    ? 'rgba(52,211,153,0.4)'
-                  : nearbyDanger.dangerLevel === 'CAUTION' ? 'rgba(251,191,36,0.4)'
-                  : 'rgba(248,113,113,0.4)'
+                  nearbyDanger.dangerLevel === 'SAFE'    ? 'rgba(30,138,110,0.4)'
+                  : nearbyDanger.dangerLevel === 'CAUTION' ? 'rgba(232,163,61,0.4)'
+                  : 'rgba(215,38,61,0.4)'
                 }`,
                 backdropFilter: 'blur(8px)',
               }}
             >
               <div className="flex items-center gap-2">
-                <span style={{ fontSize: 16 }}>
-                  {nearbyDanger.dangerLevel === 'SAFE' ? '✅'
-                  : nearbyDanger.dangerLevel === 'CAUTION' ? '⚠️' : '🚨'}
-                </span>
+                {nearbyDanger.dangerLevel === 'SAFE' ? (
+                  <CheckCircle2 size={17} strokeWidth={2} color="var(--accent-green)" />
+                ) : nearbyDanger.dangerLevel === 'CAUTION' ? (
+                  <AlertTriangle size={17} strokeWidth={2} color="var(--accent-amber)" />
+                ) : (
+                  <Siren size={17} strokeWidth={2} color="var(--accent-red)" />
+                )}
                 <div>
                   <p
                     className="text-xs font-semibold"
@@ -252,9 +279,9 @@ export default function TripPage() {
 
               {/* 시설 현황 */}
               <div className="flex gap-3 mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-                <span>📹 CCTV {nearbyDanger.cctvCount}</span>
-                <span>🔔 비상벨 {nearbyDanger.bellCount}</span>
-                <span>🚔 경찰 {nearbyDanger.policeCount}</span>
+                <span className="flex items-center gap-1"><Camera size={13} strokeWidth={2} /> CCTV {nearbyDanger.cctvCount}</span>
+                <span className="flex items-center gap-1"><Bell size={13} strokeWidth={2} /> 비상벨 {nearbyDanger.bellCount}</span>
+                <span className="flex items-center gap-1"><ShieldAlert size={13} strokeWidth={2} /> 경찰 {nearbyDanger.policeCount}</span>
               </div>
             </div>
           )}
@@ -264,13 +291,14 @@ export default function TripPage() {
             <div
               className="absolute top-1/2 left-4 right-4 -translate-y-1/2 rounded-2xl p-5 z-20 text-center"
               style={{
-                background: 'rgba(220,38,38,0.95)',
-                border: '2px solid rgba(248,113,113,0.5)',
+                background: 'rgba(215,38,61,0.95)',
+                border: '2px solid rgba(215,38,61,0.5)',
+                boxShadow: 'var(--shadow-md)',
                 backdropFilter: 'blur(12px)',
               }}
             >
-              <p className="text-2xl mb-2">🚨</p>
-              <p className="text-white font-bold mb-1">위험 구역 진입!</p>
+              <Siren size={30} strokeWidth={2} color="#fff" className="mx-auto mb-2" />
+              <p className="font-display font-bold mb-1" style={{ color: '#fff' }}>위험 구역 진입!</p>
               <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
                 주변에 안전시설이 없어요.<br />
                 빠르게 안전한 곳으로 이동하세요.
@@ -278,7 +306,7 @@ export default function TripPage() {
               <button
                 onClick={() => setDangerAlert(false)}
                 className="text-sm px-4 py-2 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}
+                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
               >
                 확인
               </button>
@@ -289,32 +317,34 @@ export default function TripPage() {
           {isNightMode && (
             <div
               className="absolute top-3 left-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium z-10"
-              style={{ background: 'rgba(167,139,250,0.2)', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', backdropFilter: 'blur(8px)' }}
+              style={{ background: 'rgba(124,92,191,0.2)', border: '1px solid rgba(124,92,191,0.4)', color: 'var(--accent-purple)', backdropFilter: 'blur(8px)' }}
             >
-              🌙 야간 안전 모드
+              <span className="beacon-dot" style={{ background: 'var(--accent-purple)' }} />
+              <Moon size={13} strokeWidth={2} />
+              야간 안전 모드
             </div>
           )}
 
           {/* 주변 안전시설 현황 */}
           <div
-            className="absolute bottom-4 left-4 right-4 rounded-xl p-4 z-10"
-            style={{ background: 'rgba(15,17,23,0.85)', border: '1px solid var(--border)', backdropFilter: 'blur(8px)' }}
+            className="absolute bottom-4 left-4 right-4 rounded-2xl p-4 z-10"
+            style={{ background: 'rgba(14,21,38,0.85)', border: '1px solid var(--ink-border)', backdropFilter: 'blur(8px)' }}
           >
-            <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs font-medium mb-3" style={{ color: 'var(--ink-text-muted)' }}>
               현재 위치 반경 500m 안전시설
             </p>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-xl font-bold" style={{ color: '#4f7ef8' }}>{cctvCount}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>CCTV</p>
+                <p className="text-xl font-bold font-mono" style={{ color: 'var(--accent-blue-light)' }}>{cctvCount}</p>
+                <p className="text-xs" style={{ color: 'var(--ink-text-muted)' }}>CCTV</p>
               </div>
               <div>
-                <p className="text-xl font-bold" style={{ color: '#f87171' }}>{bellCount}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>비상벨</p>
+                <p className="text-xl font-bold font-mono" style={{ color: 'var(--accent-red)' }}>{bellCount}</p>
+                <p className="text-xs" style={{ color: 'var(--ink-text-muted)' }}>비상벨</p>
               </div>
               <div>
-                <p className="text-xl font-bold" style={{ color: '#a78bfa' }}>{policeCount}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>경찰서</p>
+                <p className="text-xl font-bold font-mono" style={{ color: 'var(--accent-purple)' }}>{policeCount}</p>
+                <p className="text-xs" style={{ color: 'var(--ink-text-muted)' }}>경찰서</p>
               </div>
             </div>
           </div>
@@ -341,10 +371,11 @@ export default function TripPage() {
                   navigator.clipboard.writeText(url)
                   alert('위치 공유 링크가 복사됐어요!')
                 }}
-                className="w-full rounded-xl py-2 text-sm font-medium transition-all"
-                style={{ background: 'var(--accent-blue)', color: '#fff' }}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition-all"
+                style={{ background: 'var(--accent-amber)', color: 'var(--ink)' }}
               >
-                🔗 위치 공유 링크 복사
+                <Link2 size={15} strokeWidth={2} />
+                위치 공유 링크 복사
               </button>
               <p className="text-xs text-center mt-1.5" style={{ color: 'var(--text-muted)' }}>
                 링크를 받은 사람이 실시간 위치를 볼 수 있어요
@@ -375,16 +406,18 @@ export default function TripPage() {
         {/* 헤더 */}
         <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="font-display font-black text-base" style={{ color: 'var(--text-primary)' }}>
               안심 귀가
             </h1>
             {/* 야간 모드 뱃지 */}
             {isNightMode && (
               <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}
+                className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1.5"
+                style={{ background: 'rgba(124,92,191,0.15)', color: 'var(--accent-purple)' }}
               >
-                🌙 야간
+                <span className="beacon-dot beacon-dot--static" style={{ background: 'var(--accent-purple)' }} />
+                <Moon size={11} strokeWidth={2} />
+                야간
               </span>
             )}
           </div>
@@ -443,12 +476,12 @@ export default function TripPage() {
                       className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all"
                       style={{
                         background: selectedPlace?.address === fav.address
-                          ? 'rgba(79,126,248,0.1)' : 'var(--bg-card)',
+                          ? 'rgba(11,110,130,0.1)' : 'var(--bg-card)',
                         border: `1px solid ${selectedPlace?.address === fav.address
-                          ? 'rgba(79,126,248,0.3)' : 'var(--border)'}`,
+                          ? 'rgba(11,110,130,0.3)' : 'var(--border)'}`,
                       }}
                     >
-                      <span>{cfg.icon}</span>
+                      <cfg.icon size={16} strokeWidth={2} color="var(--text-muted)" className="shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                           {fav.name}
@@ -463,7 +496,7 @@ export default function TripPage() {
                       className="text-xs px-2 py-1 rounded-lg shrink-0"
                       style={{ color: 'var(--text-muted)' }}
                     >
-                      ✕
+                      <X size={14} strokeWidth={2} />
                     </button>
                   </div>
                 )
@@ -474,7 +507,7 @@ export default function TripPage() {
 
         {/* 선택된 목적지 */}
         {selectedPlace && (
-          <div className="mx-3 mt-3 rounded-xl p-3" style={{ background: 'rgba(79,126,248,0.1)', border: '1px solid rgba(79,126,248,0.2)' }}>
+          <div className="mx-3 mt-3 rounded-2xl p-3" style={{ background: 'rgba(11,110,130,0.1)', border: '1px solid rgba(11,110,130,0.2)' }}>
             <p className="text-xs font-medium mb-1" style={{ color: 'var(--accent-blue)' }}>목적지</p>
             <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{selectedPlace.name}</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{selectedPlace.address}</p>
@@ -486,10 +519,11 @@ export default function TripPage() {
               {!favorites.find(f => f.address === selectedPlace.address) && (
                 <button
                   onClick={() => setShowAddFavorite(!showAddFavorite)}
-                  className="text-xs px-2 py-1 rounded-lg"
-                  style={{ color: 'var(--accent-blue)', border: '1px solid rgba(79,126,248,0.3)' }}
+                  className="text-xs px-2 py-1 rounded-lg flex items-center gap-1"
+                  style={{ color: 'var(--accent-blue)', border: '1px solid rgba(11,110,130,0.3)' }}
                 >
-                  ⭐ 즐겨찾기 추가
+                  <Star size={12} strokeWidth={2} />
+                  즐겨찾기 추가
                 </button>
               )}
             </div>
@@ -525,53 +559,62 @@ export default function TripPage() {
             </p>
 
             {loadingRoute ? (
-              <div className="h-16 rounded-xl animate-pulse" style={{ background: 'var(--bg-card)' }} />
-            ) : safeRoute ? (
+              <div className="h-16 rounded-2xl animate-pulse" style={{ background: 'var(--bg-card)' }} />
+            ) : routeCompare && activeRoute ? (
               <>
+                {/* 경로 선택 탭 — 최단 경로 vs 안전 경로 */}
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  {([routeCompare.direct, routeCompare.safe] as const).map((route) => {
+                    const isActive = selectedRouteType === route.type
+                    return (
+                      <button
+                        key={route.type}
+                        onClick={() => setSelectedRouteType(route.type)}
+                        className="rounded-xl p-2.5 text-left transition-all"
+                        style={{
+                          background: isActive ? 'color-mix(in srgb, var(--accent-blue) 10%, var(--bg-card))' : 'var(--bg-card)',
+                          border: `1.5px solid ${isActive ? 'var(--accent-blue)' : 'var(--border)'}`,
+                        }}
+                      >
+                        <p className="text-xs font-semibold mb-1 flex items-center gap-1"
+                          style={{ color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)' }}>
+                          {route.type === 'SAFE' && <Footprints size={12} strokeWidth={2} />}
+                          {route.label}
+                        </p>
+                        <p className="text-sm font-bold font-mono"
+                          style={{
+                            color: route.safetyScore >= 60 ? 'var(--accent-green)'
+                                : route.safetyScore >= 30 ? 'var(--accent-amber)'
+                                : 'var(--accent-red)'
+                          }}>
+                          {Math.round(route.safetyScore)}점
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                          {route.type === 'SAFE' && route.extraDistanceRatio > 0
+                            ? `+${Math.round(route.extraDistanceRatio * 100)}% 더 걸어요`
+                            : '가장 짧은 거리'}
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+
                 <div
-                  className="rounded-xl p-3 mb-2"
+                  className="rounded-2xl p-3 mb-2"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 >
-                  {/* 안전점수 */}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      경로 안전점수
-                    </span>
-                    <span
-                      className="text-sm font-bold"
-                      style={{
-                        color: safeRoute.safetyScore >= 60 ? 'var(--accent-green)'
-                            : safeRoute.safetyScore >= 30 ? 'var(--accent-amber)'
-                            : 'var(--accent-red)'
-                      }}
-                    >
-                      {Math.round(safeRoute.safetyScore)}점
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-1.5 mb-3" style={{ background: 'var(--bg-hover)' }}>
-                    <div
-                      className="h-1.5 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(safeRoute.safetyScore, 100)}%`,
-                        background: safeRoute.safetyScore >= 60 ? 'var(--accent-green)'
-                                  : safeRoute.safetyScore >= 30 ? 'var(--accent-amber)'
-                                  : 'var(--accent-red)',
-                      }}
-                    />
-                  </div>
-
                   {/* 시설 현황 */}
                   <div className="grid grid-cols-3 gap-2 text-center mb-3">
                     <div>
-                      <p className="text-sm font-bold" style={{ color: '#4f7ef8' }}>{safeRoute.totalCctv}</p>
+                      <p className="text-sm font-bold font-mono" style={{ color: 'var(--accent-blue)' }}>{activeRoute.totalCctv}</p>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>CCTV</p>
                     </div>
                     <div>
-                      <p className="text-sm font-bold" style={{ color: '#f87171' }}>{safeRoute.totalBell}</p>
+                      <p className="text-sm font-bold font-mono" style={{ color: 'var(--accent-red)' }}>{activeRoute.totalBell}</p>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>비상벨</p>
                     </div>
                     <div>
-                      <p className="text-sm font-bold" style={{ color: '#a78bfa' }}>{safeRoute.totalPolice}</p>
+                      <p className="text-sm font-bold font-mono" style={{ color: 'var(--accent-purple)' }}>{activeRoute.totalPolice}</p>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>경찰서</p>
                     </div>
                   </div>
@@ -580,25 +623,34 @@ export default function TripPage() {
                   <div
                     className="rounded-lg px-3 py-2 text-xs leading-relaxed"
                     style={{
-                      background: safeRoute.safetyScore >= 60
-                        ? 'rgba(52,211,153,0.1)' : safeRoute.safetyScore >= 30
-                        ? 'rgba(251,191,36,0.1)' : 'rgba(248,113,113,0.1)',
-                      color: safeRoute.safetyScore >= 60
-                        ? 'var(--accent-green)' : safeRoute.safetyScore >= 30
+                      background: activeRoute.safetyScore >= 60
+                        ? 'rgba(30,138,110,0.1)' : activeRoute.safetyScore >= 30
+                        ? 'rgba(232,163,61,0.1)' : 'rgba(215,38,61,0.1)',
+                      color: activeRoute.safetyScore >= 60
+                        ? 'var(--accent-green)' : activeRoute.safetyScore >= 30
                         ? 'var(--accent-amber)' : 'var(--accent-red)',
                     }}
                   >
-                    {safeRoute.totalCctv + safeRoute.totalBell + safeRoute.totalPolice > 0 ? (
+                    {activeRoute.totalCctv + activeRoute.totalBell + activeRoute.totalPolice > 0 ? (
                       <>
-                        이 경로 주변에 CCTV {safeRoute.totalCctv}개,
-                        비상벨 {safeRoute.totalBell}개가 있어요.<br />
-                        지도의 마커 근처로 이동하면 더 안전해요. 🔵
+                        이 경로 주변에 CCTV {activeRoute.totalCctv}개,
+                        비상벨 {activeRoute.totalBell}개가 있어요.<br />
+                        지도의 마커 근처로 이동하면 더 안전해요.{' '}
+                        <span
+                          style={{
+                            display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
+                            background: 'var(--accent-blue)', verticalAlign: 'middle',
+                          }}
+                        />
                       </>
                     ) : (
-                      <>
-                        ⚠️ 이 경로 주변에 안전시설이 부족해요.<br />
-                        가능하면 밝은 길이나 사람이 많은 곳으로 이동하세요.
-                      </>
+                      <span className="flex items-start gap-1.5">
+                        <AlertTriangle size={13} strokeWidth={2} className="shrink-0 mt-0.5" />
+                        <span>
+                          이 경로 주변에 안전시설이 부족해요.<br />
+                          가능하면 밝은 길이나 사람이 많은 곳으로 이동하세요.
+                        </span>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -611,10 +663,18 @@ export default function TripPage() {
                   className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all"
                   style={{ background: '#FEE500', color: '#3C1E1E' }}
                 >
-                  <span>🗺</span>
+                  <MapIcon size={15} strokeWidth={2} />
                   카카오맵 길찾기 (참고용)
                 </a>
               </>
+            ) : routeError ? (
+              <div
+                className="rounded-xl px-3 py-2.5 text-xs flex items-start gap-1.5"
+                style={{ background: 'var(--accent-red-soft)', color: 'var(--accent-red)' }}
+              >
+                <AlertTriangle size={13} strokeWidth={2} className="shrink-0 mt-0.5" />
+                {routeError}
+              </div>
             ) : null}
           </div>
         )}
@@ -648,13 +708,34 @@ export default function TripPage() {
 
         {/* 귀가 시작 버튼 */}
         <div className="p-4">
+          {selectedPlace && !selectedRouteType && (
+            <p className="text-xs text-center mb-2 flex items-center justify-center gap-1.5" style={{ color: 'var(--accent-amber-deep)' }}>
+              <Footprints size={13} strokeWidth={2} />
+              위에서 경로를 먼저 선택해주세요
+            </p>
+          )}
           <button
             onClick={() => startMutation.mutate()}
-            disabled={!selectedPlace || startMutation.isPending}
-            className="w-full rounded-xl py-3 text-sm font-medium transition-all disabled:opacity-40"
-            style={{ background: isNightMode ? '#a78bfa' : 'var(--accent-blue)', color: '#fff' }}
+            disabled={!selectedPlace || !selectedRouteType || startMutation.isPending}
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-40"
+            style={{
+              background: isNightMode ? 'var(--accent-purple)' : 'var(--accent-amber)',
+              color:      isNightMode ? '#fff' : 'var(--ink)',
+              boxShadow:  isNightMode ? 'none' : 'var(--shadow-beacon)',
+            }}
           >
-            {startMutation.isPending ? '시작 중...' : isNightMode ? '🌙 야간 안심 귀가 시작' : '귀가 시작'}
+            {startMutation.isPending ? (
+              '시작 중...'
+            ) : isNightMode ? (
+              <>
+                <Moon size={15} strokeWidth={2} />
+                야간 안심 귀가 시작
+              </>
+            ) : selectedRouteType ? (
+              `${selectedRouteType === 'SAFE' ? '안전' : '최단'} 경로로 귀가 시작`
+            ) : (
+              '귀가 시작'
+            )}
           </button>
         </div>
       </aside>
@@ -677,12 +758,22 @@ export default function TripPage() {
           {selectedPlace && (
             <MapMarker position={{ lat: selectedPlace.lat, lng: selectedPlace.lng }} />
           )}
-            {/* 안전 경유 지점 마커 추가 */}
-          {safeRoute?.safePoints.map((point, i) => (
+          {/* 선택된 경로 선 */}
+          {activeRoute && activeRoute.path.length > 1 && (
+            <Polyline
+              path={activeRoute.path.map(p => ({ lat: p.lat!, lng: p.lng! }))}
+              strokeWeight={4}
+              strokeColor={activeRoute.type === 'SAFE' ? '#e8a33d' : '#0b6e82'}
+              strokeOpacity={0.8}
+              strokeStyle="solid"
+            />
+          )}
+            {/* 안전 시설(경로 주변) 마커 */}
+          {activeRoute?.safePoints.map((point, i) => (
             <MapMarker
               key={`route-${i}`}
-              position={{ lat: point.lat, lng: point.lng }}
-              image={getFacilityMarkerImage(point.type)}
+              position={{ lat: point.lat!, lng: point.lng! }}
+              image={getFacilityMarkerImage(point.type!)}
             />
           ))}
         </Map>
@@ -690,7 +781,7 @@ export default function TripPage() {
         {/* 지도 안내 */}
         <div
           className="absolute top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs pointer-events-none"
-          style={{ background: 'rgba(15,17,23,0.8)', color: 'var(--text-secondary)', border: '1px solid var(--border)', backdropFilter: 'blur(8px)' }}
+          style={{ background: 'rgba(14,21,38,0.8)', color: 'var(--ink-text-muted)', border: '1px solid var(--ink-border)', backdropFilter: 'blur(8px)' }}
         >
           지도를 클릭하면 목적지로 설정돼요
         </div>

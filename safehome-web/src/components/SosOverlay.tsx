@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSosDetection } from '@/hooks/useSosDetection'
 import { tripApi } from '@/api/trip'
+import { Mic, MicOff, Siren, Phone, Users, MapPin } from 'lucide-react'
 // import { useAuthStore } from '@/store/authStore'
 
 interface Props {
@@ -72,17 +73,20 @@ export default function SosOverlay({ activeTripId }: Props) {
         {isSupported && (
           <button
             onClick={toggleListening}
-            className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all"
+            className="w-13 h-13 rounded-full flex items-center justify-center transition-all"
             style={{
-              background: isListening ? 'rgba(248,113,113,0.2)' : 'var(--bg-card)',
+              width: 52,
+              height: 52,
+              background: isListening ? 'var(--accent-red-soft)' : 'var(--bg-card)',
               border: `2px solid ${isListening ? 'var(--accent-red)' : 'var(--border)'}`,
+              boxShadow: 'var(--shadow-md)',
             }}
             title={isListening ? '음성 감지 중지' : '음성 감지 시작'}
           >
             {isListening ? (
-              <span className="animate-pulse text-lg">🎙</span>
+              <Mic size={22} strokeWidth={2} color="var(--accent-red)" className="animate-pulse" />
             ) : (
-              <span className="text-lg" style={{ opacity: 0.5 }}>🎙</span>
+              <MicOff size={22} strokeWidth={2} color="var(--text-muted)" />
             )}
           </button>
         )}
@@ -90,11 +94,13 @@ export default function SosOverlay({ activeTripId }: Props) {
         {/* SOS 버튼 */}
         <button
           onClick={() => setSosMode(true)}
-          className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all font-bold text-sm"
+          className="rounded-full flex items-center justify-center transition-all font-display font-black text-sm"
           style={{
+            width: 56,
+            height: 56,
             background: 'var(--accent-red)',
             color: '#fff',
-            boxShadow: '0 0 20px rgba(248,113,113,0.4)',
+            boxShadow: '0 0 0 4px rgba(215,38,61,0.15), 0 6px 20px rgba(215,38,61,0.45)',
           }}
         >
           SOS
@@ -104,15 +110,16 @@ export default function SosOverlay({ activeTripId }: Props) {
       {/* 음성 감지 중 transcript 표시 */}
       {isListening && transcript && (
         <div
-          className="fixed bottom-36 right-4 sm:bottom-24 rounded-xl px-3 py-2 text-xs max-w-48 z-40"
+          className="fixed bottom-36 right-4 sm:bottom-24 rounded-xl px-3 py-2 text-xs max-w-48 z-40 flex items-center gap-1.5"
           style={{
-            background: 'rgba(15,17,23,0.8)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-muted)',
+            background: 'var(--ink)',
+            border: '1px solid var(--ink-border)',
+            color: 'var(--ink-text-muted)',
             backdropFilter: 'blur(8px)',
           }}
         >
-          🎙 {transcript.slice(-30)}
+          <Mic size={13} strokeWidth={2} className="shrink-0" />
+          {transcript.slice(-30)}
         </div>
       )}
 
@@ -120,7 +127,7 @@ export default function SosOverlay({ activeTripId }: Props) {
       {sosMode && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(220,38,38,0.95)', backdropFilter: 'blur(4px)' }}
+          style={{ background: 'rgba(215,38,61,0.96)', backdropFilter: 'blur(4px)' }}
         >
           <div className="w-full max-w-sm text-center">
 
@@ -129,13 +136,13 @@ export default function SosOverlay({ activeTripId }: Props) {
               className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
               style={{ background: 'rgba(255,255,255,0.2)' }}
             >
-              <span className="text-5xl">🚨</span>
+              <Siren size={48} strokeWidth={2} color="white" />
             </div>
 
             {/* 자동 감지 vs 수동 */}
             {autoTriggered && !sent ? (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">위험 감지!</h2>
+                <h2 className="font-display font-black text-2xl text-white mb-2">위험 감지!</h2>
                 <p className="text-white/80 mb-2 text-sm">음성에서 위험 신호가 감지됐어요</p>
                 <p className="text-white/60 text-xs mb-6">
                   "{transcript.slice(-20)}"
@@ -152,12 +159,12 @@ export default function SosOverlay({ activeTripId }: Props) {
               </>
             ) : sent ? (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">알림 전송 완료</h2>
+                <h2 className="font-display font-black text-2xl text-white mb-2">알림 전송 완료</h2>
                 <p className="text-white/80 mb-6 text-sm">비상연락처에 현재 상황을 알렸어요</p>
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-white mb-2">위급상황이신가요?</h2>
+                <h2 className="font-display font-black text-2xl text-white mb-2">위급상황이신가요?</h2>
                 <p className="text-white/80 mb-6 text-sm">
                   아래 버튼을 누르면 비상연락처에<br />즉시 알림이 전송돼요
                 </p>
@@ -169,10 +176,11 @@ export default function SosOverlay({ activeTripId }: Props) {
               {/* 112 신고 */}
               <a
                 href="tel:112"
-                className="w-full py-4 rounded-2xl font-bold text-lg transition-all"
-                style={{ background: 'white', color: '#dc2626' }}
+                className="w-full py-4 rounded-2xl font-display font-black text-lg transition-all flex items-center justify-center gap-2"
+                style={{ background: 'white', color: 'var(--accent-red)' }}
               >
-                📞 112 신고
+                <Phone size={20} strokeWidth={2.25} />
+                112 신고
               </a>
 
               {/* 비상연락처 알림 */}
@@ -180,14 +188,19 @@ export default function SosOverlay({ activeTripId }: Props) {
                 <button
                   onClick={handleSos}
                   disabled={sending}
-                  className="w-full py-3 rounded-2xl font-medium transition-all disabled:opacity-50"
+                  className="w-full py-3 rounded-2xl font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{
                     background: 'rgba(255,255,255,0.2)',
                     border: '2px solid white',
                     color: 'white',
                   }}
                 >
-                  {sending ? '전송 중...' : '👥 비상연락처에 알림 보내기'}
+                  {sending ? '전송 중...' : (
+                    <>
+                      <Users size={17} strokeWidth={2} />
+                      비상연락처에 알림 보내기
+                    </>
+                  )}
                 </button>
               )}
 
@@ -210,10 +223,11 @@ export default function SosOverlay({ activeTripId }: Props) {
                   alert('위치 링크가 복사됐어요!')
                 })
               }}
-              className="mt-4 text-xs"
+              className="mt-4 text-xs inline-flex items-center gap-1.5"
               style={{ color: 'rgba(255,255,255,0.5)' }}
             >
-              📍 현재 위치 링크 복사
+              <MapPin size={13} strokeWidth={2} />
+              현재 위치 링크 복사
             </button>
           </div>
         </div>

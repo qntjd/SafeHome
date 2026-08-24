@@ -21,6 +21,14 @@ public class TripController {
 
     private final TripService tripService;
 
+    @Operation(summary = "진행 중인 귀가 조회 (새로고침 시 상태 복원용)")
+    @GetMapping("/active")
+    public ApiResponse<TripDto.TripResponse> getActive(
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        return ApiResponse.success(tripService.getActiveTrip(user.getUsername()));
+    }
+
     @Operation(summary = "귀가 시작")
     @PostMapping
     public ApiResponse<TripDto.TripResponse> start(

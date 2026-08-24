@@ -24,6 +24,14 @@ public class CrimeStatController {
         return ApiResponse.success(crimeStatService.getAllDistrictCrimes(year));
     }
 
+    @Operation(summary = "시/도 단위로 묶은 범죄 통계 조회 (시/군/구 세부 데이터가 있으면 함께 반환)")
+    @GetMapping("/grouped")
+    public ApiResponse<CrimeStatDto.AllDistrictCrimeGroupedResponse> getAllCrimesGrouped(
+            @RequestParam(defaultValue = "2024") Integer year
+    ) {
+        return ApiResponse.success(crimeStatService.getAllDistrictCrimesGrouped(year));
+    }
+
     @Operation(summary = "특정 지역 범죄 통계 조회")
     @GetMapping("/{districtCode}")
     public ApiResponse<CrimeStatDto.DistrictCrimeResponse> getDistrictCrimes(

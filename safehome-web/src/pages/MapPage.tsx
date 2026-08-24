@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
+import { MapPin } from 'lucide-react'
 import { safetyApi } from '@/api/safety'
 import { crimeApi } from '@/api/crime'
 import type { FacilityResponse } from '@/api/safety'
@@ -9,26 +10,26 @@ import { useCurrentLocation } from '@/hooks/useCurrentLocation'
 import { getFacilityMarkerImage } from '@/utils/mapUtils'
 
 const FACILITY_CONFIG = {
-  CCTV:           { color: '#4f7ef8', label: 'CCTV' },
-  EMERGENCY_BELL: { color: '#f87171', label: '비상벨' },
-  STREETLIGHT:    { color: '#fbbf24', label: '가로등' },
-  POLICE:         { color: '#a78bfa', label: '경찰서·파출소' },
+  CCTV:           { color: 'var(--accent-blue)',   label: 'CCTV' },
+  EMERGENCY_BELL: { color: 'var(--accent-red)',    label: '비상벨' },
+  STREETLIGHT:    { color: 'var(--accent-amber)',  label: '가로등' },
+  POLICE:         { color: 'var(--accent-purple)', label: '경찰서·파출소' },
 }
 
 const GRADE_CONFIG: Record<string, { color: string; bg: string }> = {
-  A: { color: 'var(--accent-green)',  bg: 'rgba(52,211,153,0.12)' },
-  B: { color: 'var(--accent-blue)',   bg: 'rgba(79,126,248,0.12)' },
-  C: { color: 'var(--accent-amber)',  bg: 'rgba(251,191,36,0.12)' },
-  D: { color: '#fb923c',              bg: 'rgba(251,146,60,0.12)' },
-  F: { color: 'var(--accent-red)',    bg: 'rgba(248,113,113,0.12)' },
+  A: { color: 'var(--grade-a)', bg: 'var(--grade-a-bg)' },
+  B: { color: 'var(--grade-b)', bg: 'var(--grade-b-bg)' },
+  C: { color: 'var(--grade-c)', bg: 'var(--grade-c-bg)' },
+  D: { color: 'var(--grade-d)', bg: 'var(--grade-d-bg)' },
+  F: { color: 'var(--grade-f)', bg: 'var(--grade-f-bg)' },
 }
 
 const CRIME_TYPE_COLORS: Record<string, string> = {
-  '강력범죄': '#f87171',
-  '폭행':     '#fb923c',
-  '절도':     '#fbbf24',
-  '성범죄':   '#c084fc',
-  '기타':     '#6b7280',
+  '강력범죄': 'var(--accent-red)',
+  '폭행':     'var(--grade-d)',
+  '절도':     'var(--accent-amber)',
+  '성범죄':   'var(--accent-purple)',
+  '기타':     'var(--text-muted)',
 }
 
 
@@ -72,6 +73,14 @@ export default function MapPage() {
     enabled:  !!position,
   })
 
+  // 지도 마커는 트래픽 최적화를 위해 최대 300개로 제한되므로,
+  // "내 동네" 요약에는 실제 총개수를 세는 전용 카운트 API를 따로 쓴다.
+  const { data: facilityCounts } = useQuery({
+    queryKey: ['facility-counts', position],
+    queryFn:  () => safetyApi.getFacilityCounts(position.lat, position.lng, 3000),
+    enabled:  !!position,
+  })
+
   const { data: heatmap } = useQuery({
     queryKey: ['heatmap'],
     queryFn:  () => safetyApi.getHeatmap(),
@@ -96,12 +105,15 @@ export default function MapPage() {
 
   const maxCrimeCount = Math.max(...crimes.map(d => d.totalCount), 1)
 
+  // 저강도(--border-hover) → 고강도(--accent-red) 보간
   const getCrimeColor = (count: number) => {
     const intensity = count / maxCrimeCount
-    const r = Math.round(248 * intensity + 30 * (1 - intensity))
-    const g = Math.round(50 * (1 - intensity))
-    const b = Math.round(50 * (1 - intensity))
-    return `rgba(${r}, ${g}, ${b}, ${0.2 + intensity * 0.4})`
+    const from = { r: 195, g: 203, b: 220 } // var(--border-hover)
+    const to   = { r: 215, g: 38,  b: 61  } // var(--accent-red)
+    const r = Math.round(from.r + (to.r - from.r) * intensity)
+    const g = Math.round(from.g + (to.g - from.g) * intensity)
+    const b = Math.round(from.b + (to.b - from.b) * intensity)
+    return `rgba(${r}, ${g}, ${b}, ${0.35 + intensity * 0.45})`
   }
 
   // 내 동네 매칭
@@ -143,9 +155,9 @@ export default function MapPage() {
               onClick={() => toggleType(type)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
               style={{
-                background:     activeTypes.has(type) ? cfg.color : 'rgba(15,17,23,0.7)',
-                color:          activeTypes.has(type) ? '#fff' : 'rgba(255,255,255,0.5)',
-                border:         `1px solid ${activeTypes.has(type) ? cfg.color : 'rgba(255,255,255,0.15)'}`,
+                background:     activeTypes.has(type) ? cfg.color : 'rgba(14,21,38,0.7)',
+                color:          activeTypes.has(type) ? '#fff' : 'var(--ink-text-muted)',
+                border:         `1px solid ${activeTypes.has(type) ? cfg.color : 'var(--ink-border)'}`,
                 backdropFilter: 'blur(8px)',
               }}
             >
@@ -159,10 +171,11 @@ export default function MapPage() {
         {/* 선택된 시설 팝업 */}
         {selectedFacility && (
           <div
-            className="absolute bottom-4 left-4 rounded-xl p-4 shadow-xl"
+            className="absolute bottom-4 left-4 rounded-2xl p-4"
             style={{
               background:     'var(--bg-card)',
               border:         '1px solid var(--border)',
+              boxShadow:      'var(--shadow-md)',
               backdropFilter: 'blur(8px)',
               minWidth:       180,
             }}
@@ -170,7 +183,7 @@ export default function MapPage() {
             <div className="flex items-center gap-2 mb-1">
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ background: FACILITY_CONFIG[selectedFacility.type as keyof typeof FACILITY_CONFIG]?.color ?? '#888' }}
+                style={{ background: FACILITY_CONFIG[selectedFacility.type as keyof typeof FACILITY_CONFIG]?.color ?? 'var(--text-muted)' }}
               >
                 <div className="w-2 h-2 rounded-full bg-white" />
               </div>
@@ -225,21 +238,21 @@ export default function MapPage() {
                 <div className="p-3" style={{ borderBottom: '1px solid var(--border)' }}>
                   <p className="text-xs mb-2 flex items-center gap-1"
                     style={{ color: 'var(--accent-blue)' }}>
-                    <span>📍</span> 내 동네
+                    <MapPin size={12} strokeWidth={2} /> 내 동네
                   </p>
                   <div
-                    className="rounded-xl p-3"
+                    className="rounded-2xl p-3"
                     style={{
-                      background: 'rgba(79,126,248,0.08)',
-                      border:     '1px solid rgba(79,126,248,0.2)',
+                      background: 'rgba(11,110,130,0.08)',
+                      border:     '1px solid rgba(11,110,130,0.2)',
                     }}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      <span className="text-sm font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {myDistrict.districtName}
                       </span>
                       <span
-                        className="text-xs font-bold px-2 py-0.5 rounded-full"
+                        className="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
                         style={{ color: gc.color, background: gc.bg }}
                       >
                         {myDistrict.grade}등급
@@ -251,11 +264,11 @@ export default function MapPage() {
                         style={{ width: `${myDistrict.totalScore}%`, background: gc.color }} />
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                         {Math.round(myDistrict.totalScore)}점
                       </p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        CCTV {Math.round(myDistrict.cctvScore)} · 비상벨 {Math.round(myDistrict.bellScore)}
+                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                        CCTV {facilityCounts?.data?.data?.cctvCount ?? '--'} · 비상벨 {facilityCounts?.data?.data?.bellCount ?? '--'}
                       </p>
                     </div>
                   </div>
@@ -279,21 +292,21 @@ export default function MapPage() {
                   return (
                     <div
                       key={d.districtCode}
-                      className="rounded-xl p-3"
+                      className="rounded-2xl p-3"
                       style={{
                         background: 'var(--bg-card)',
-                        border:     `1px solid ${isMine ? 'rgba(79,126,248,0.3)' : 'var(--border)'}`,
+                        border:     `1px solid ${isMine ? 'rgba(11,110,130,0.3)' : 'var(--border)'}`,
                       }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1.5">
-                          {isMine && <span style={{ fontSize: 10 }}>📍</span>}
+                          {isMine && <MapPin size={11} strokeWidth={2} color="var(--accent-blue)" />}
                           <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                             {d.districtName}
                           </span>
                         </div>
                         <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-full"
+                          className="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
                           style={{ color: gc.color, background: gc.bg }}
                         >
                           {d.grade}
@@ -304,7 +317,7 @@ export default function MapPage() {
                         <div className="h-1.5 rounded-full transition-all"
                           style={{ width: `${d.totalScore}%`, background: gc.color }} />
                       </div>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                         {Math.round(d.totalScore)}점
                       </p>
                     </div>
@@ -332,19 +345,19 @@ export default function MapPage() {
                   onClick={() => setSelectedDistrict(
                     selectedDistrict?.districtCode === district.districtCode ? null : district
                   )}
-                  className="rounded-xl p-3 cursor-pointer transition-all"
+                  className="rounded-2xl p-3 cursor-pointer transition-all"
                   style={{
                     background: selectedDistrict?.districtCode === district.districtCode
-                      ? 'rgba(248,113,113,0.1)' : 'var(--bg-card)',
+                      ? 'var(--accent-red-soft)' : 'var(--bg-card)',
                     border: `1px solid ${selectedDistrict?.districtCode === district.districtCode
-                      ? 'rgba(248,113,113,0.3)' : 'var(--border)'}`,
+                      ? 'rgba(215,38,61,0.3)' : 'var(--border)'}`,
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {district.districtName}
                     </span>
-                    <span className="text-xs font-bold" style={{ color: 'var(--accent-red)' }}>
+                    <span className="text-xs font-bold font-mono" style={{ color: 'var(--accent-red)' }}>
                       {district.totalCount.toLocaleString()}건
                     </span>
                   </div>
@@ -365,7 +378,7 @@ export default function MapPage() {
                         <div key={type} className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full"
-                              style={{ background: CRIME_TYPE_COLORS[type] ?? '#888' }} />
+                              style={{ background: CRIME_TYPE_COLORS[type] ?? 'var(--text-muted)' }} />
                             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                               {type}
                             </span>
@@ -375,11 +388,11 @@ export default function MapPage() {
                               className="h-1 rounded-full"
                               style={{
                                 width:      `${(count / district.totalCount) * 60}px`,
-                                background: CRIME_TYPE_COLORS[type] ?? '#888',
+                                background: CRIME_TYPE_COLORS[type] ?? 'var(--text-muted)',
                                 opacity:    0.6,
                               }}
                             />
-                            <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                            <span className="text-xs font-mono font-medium" style={{ color: 'var(--text-primary)' }}>
                               {count.toLocaleString()}
                             </span>
                           </div>
@@ -393,8 +406,8 @@ export default function MapPage() {
           </div>
         )}
 
-        {/* 범례 */}
-        <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
+        {/* 범례 — 하단 SOS/음성감지 플로팅 버튼에 안 가리게 여유 확보 */}
+        <div className="p-4 pb-28" style={{ borderTop: '1px solid var(--border)' }}>
           {activeTab === 'safety' ? (
             <>
               <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>시설 종류</p>

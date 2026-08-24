@@ -31,6 +31,12 @@ export interface NearbyDangerResponse {
   message: string
 }
 
+export interface FacilityCountResponse {
+  cctvCount: number
+  bellCount: number
+  policeCount: number
+}
+
 export const safetyApi = {
   getFacilities: (lat: number, lng: number, radius = 500) =>
     api.get<{ data: FacilityResponse[] }>('/safety/facilities', {
@@ -50,10 +56,20 @@ export const safetyApi = {
     params: { startLat, startLng, endLat, endLng }
   }),
 
+  getRouteCompare: (startLat: number, startLng: number, endLat: number, endLng: number) =>
+  api.get<{ data: RouteCompareResponse }>('/safety/route-compare', {
+    params: { startLat, startLng, endLat, endLng }
+  }),
+
   getNearbyDanger: (lat: number, lng: number) =>
   api.get<{ data: NearbyDangerResponse }>('/safety/nearby-danger', {
     params: { lat, lng }
   }),
+
+  getFacilityCounts: (lat: number, lng: number, radius = 500) =>
+    api.get<{ data: FacilityCountResponse }>('/safety/facilities/count', {
+      params: { lat, lng, radius },
+    }),
 }
 
 export interface RoutePoint {
@@ -69,4 +85,21 @@ export interface SafeRouteResponse {
   totalBell: number
   totalPolice: number
   safetyScore: number
+}
+
+export interface RouteOption {
+  type: 'DIRECT' | 'SAFE'
+  label: string
+  path: RoutePoint[]
+  safePoints: RoutePoint[]
+  totalCctv: number
+  totalBell: number
+  totalPolice: number
+  safetyScore: number
+  extraDistanceRatio: number
+}
+
+export interface RouteCompareResponse {
+  direct: RouteOption
+  safe: RouteOption
 }

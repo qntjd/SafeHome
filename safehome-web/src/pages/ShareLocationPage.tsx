@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
+import { Link2, Siren } from 'lucide-react'
 import { tripApi } from '@/api/trip'
 
 export default function ShareLocationPage() {
@@ -23,7 +24,7 @@ export default function ShareLocationPage() {
       <div className="text-center">
         <div
           className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
-          style={{ borderColor: 'var(--accent-blue)', borderTopColor: 'transparent' }}
+          style={{ borderColor: 'var(--accent-amber)', borderTopColor: 'transparent' }}
         />
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>위치 불러오는 중...</p>
       </div>
@@ -36,7 +37,7 @@ export default function ShareLocationPage() {
       style={{ background: 'var(--bg-primary)' }}
     >
       <div className="text-center">
-        <p className="text-3xl mb-3">🔗</p>
+        <Link2 size={32} strokeWidth={1.75} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
           유효하지 않은 링크이거나 만료된 링크예요.
         </p>
@@ -45,10 +46,10 @@ export default function ShareLocationPage() {
   )
 
   const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-    IN_PROGRESS: { label: '귀가 중', color: 'var(--accent-blue)' },
-    ARRIVED:     { label: '도착 완료', color: 'var(--accent-green)' },
+    IN_PROGRESS: { label: '귀가 중', color: 'var(--accent-amber)' },
+    ARRIVED:     { label: '도착 완료', color: 'var(--grade-a)' },
     SOS:         { label: 'SOS 발동', color: 'var(--accent-red)' },
-    CANCELLED:   { label: '취소됨', color: 'var(--text-muted)' },
+    CANCELLED:   { label: '취소됨', color: 'var(--ink-text-muted)' },
   }
   const statusCfg = STATUS_LABEL[location.status] ?? STATUS_LABEL.IN_PROGRESS
 
@@ -57,23 +58,26 @@ export default function ShareLocationPage() {
       {/* 헤더 */}
       <div
         className="px-4 py-3 flex items-center justify-between shrink-0"
-        style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}
+        style={{ background: 'var(--ink)', borderBottom: '1px solid var(--ink-border)' }}
       >
         <div className="flex items-center gap-2">
           <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
-            style={{ background: 'var(--accent-blue)' }}
+            className="w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--accent-amber)' }}
           >
-            S
+            <span className="font-display font-black text-sm" style={{ color: 'var(--ink)' }}>S</span>
           </div>
-          <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+          <span className="font-display font-extrabold text-sm tracking-tight" style={{ color: 'var(--ink-text)' }}>
             SafeHome
           </span>
         </div>
         <span
-          className="text-xs px-3 py-1 rounded-full font-medium"
-          style={{ color: statusCfg.color, background: `${statusCfg.color}20` }}
+          className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
+          style={{ color: statusCfg.color, background: 'var(--ink-2)', border: `1px solid ${statusCfg.color}` }}
         >
+          {location.status === 'IN_PROGRESS' && (
+            <span className="beacon-dot" style={{ background: statusCfg.color }} />
+          )}
           {statusCfg.label}
         </span>
       </div>
@@ -101,22 +105,23 @@ export default function ShareLocationPage() {
         <div
           className="absolute bottom-4 left-4 right-4 rounded-2xl p-4"
           style={{
-            background: 'rgba(15,17,23,0.9)',
-            border: '1px solid var(--border)',
+            background: 'rgba(14,21,38,0.92)',
+            border: '1px solid var(--ink-border)',
+            boxShadow: 'var(--shadow-md)',
             backdropFilter: 'blur(12px)',
           }}
         >
-          <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+          <p className="font-display font-bold text-sm mb-3" style={{ color: 'var(--ink-text)' }}>
             {location.nickname}님의 귀가 현황
           </p>
           <div className="flex flex-col gap-2 text-xs">
             <div className="flex justify-between">
-              <span style={{ color: 'var(--text-muted)' }}>상태</span>
+              <span style={{ color: 'var(--ink-text-muted)' }}>상태</span>
               <span style={{ color: statusCfg.color, fontWeight: 600 }}>{statusCfg.label}</span>
             </div>
             <div className="flex justify-between">
-              <span style={{ color: 'var(--text-muted)' }}>예상 도착</span>
-              <span style={{ color: 'var(--text-primary)' }}>
+              <span style={{ color: 'var(--ink-text-muted)' }}>예상 도착</span>
+              <span className="font-mono" style={{ color: 'var(--ink-text)' }}>
                 {new Date(location.expectedArrivalAt).toLocaleTimeString('ko-KR')}
               </span>
             </div>
@@ -124,14 +129,16 @@ export default function ShareLocationPage() {
 
           {location.status === 'SOS' && (
             <div
-              className="mt-3 rounded-xl px-3 py-2 text-xs font-medium text-center"
-              style={{ background: 'rgba(248,113,113,0.2)', color: 'var(--accent-red)' }}
+              className="mt-3 rounded-xl px-3 py-2 text-xs font-bold text-center flex items-center justify-center gap-1.5"
+              style={{ background: 'rgba(215,38,61,0.25)', border: '1px solid var(--accent-red)', color: '#fff' }}
             >
-              🚨 SOS가 발동됐어요! 즉시 연락해주세요.
+              <Siren size={14} strokeWidth={2.25} />
+              SOS가 발동됐어요! 즉시 연락해주세요.
             </div>
           )}
 
-          <p className="text-xs text-center mt-3" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs text-center mt-3 flex items-center justify-center gap-1.5" style={{ color: 'var(--ink-text-muted)' }}>
+            <span className="beacon-dot beacon-dot--static" style={{ width: 5, height: 5 }} />
             30초마다 자동 새로고침
           </p>
         </div>

@@ -1,38 +1,174 @@
 @import "tailwindcss";
 
+/*
+  SafeHome 디자인 시스템 — "등대 (Beacon)"
+  밤길을 밝히는 가로등·CCTV·비상벨처럼, 어둠 속에서 신뢰할 수 있는 신호를 준다는 컨셉.
+  딥 네이비 잉크(--ink) 기반 위에 웜 앰버(--accent-amber, "beacon")를 신호색으로,
+  틸(--accent-blue)을 기관 신뢰색으로 사용한다.
+*/
+
 :root {
-  --bg-primary: #f0f4f8;
+  /* 배경 */
+  --bg-primary: #e9edf6;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --bg-hover: #f8fafc;
-  --bg-blue-soft: #eff6ff;
-  --border: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --accent-blue: #1d4ed8;
-  --accent-blue-light: #3b82f6;
-  --accent-blue-hover: #1e40af;
-  --accent-green: #059669;
-  --accent-red: #dc2626;
-  --accent-amber: #d97706;
-  --accent-purple: #7c3aed;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --bg-hover: #f1f4fa;
+  --bg-blue-soft: #e6f1f3;
+
+  /* 경계선 */
+  --border: #dbe1ec;
+  --border-hover: #c3cbdc;
+
+  /* 텍스트 */
+  --text-primary: #131c30;
+  --text-secondary: #4b5770;
+  --text-muted: #8996ac;
+
+  /* 다크 잉크 크롬 (네비게이션·푸터·배너) */
+  --ink: #0e1526;
+  --ink-2: #182238;
+  --ink-3: #22304c;
+  --ink-border: rgba(255, 255, 255, 0.09);
+  --ink-text: #eef1f8;
+  --ink-text-muted: #8592ac;
+
+  /* 액센트 */
+  --accent-blue: #0b6e82;
+  --accent-blue-light: #1690a3;
+  --accent-blue-hover: #084f5c;
+  --accent-green: #1e8a6e;
+  --accent-red: #d7263d;
+  --accent-red-soft: #fbe1e4;
+  --accent-amber: #e8a33d;
+  --accent-amber-deep: #c97e1d;
+  --accent-amber-soft: #fcf1dc;
+  --accent-purple: #7c5cbf;
+
+  /* 등급 색 (A~F) — 인지 밝기(perceived lightness)를 서로 맞춤.
+     노랑/앰버 계열은 같은 RGB 밝기라도 유독 밝아 보이므로(토스 TDS 컬러 시스템 개편 원칙 참고),
+     시그니처 액센트(--accent-amber)보다 한 톤 죽인 --grade-c를 별도로 둔다. */
+  --grade-a: #1e8a6e;
+  --grade-a-bg: #e6f4ef;
+  --grade-b: #0b6e82;
+  --grade-b-bg: #e1f0f2;
+  --grade-c: #c9902e;
+  --grade-c-bg: #f6ecd8;
+  --grade-d: #d97a34;
+  --grade-d-bg: #fbe9d9;
+  --grade-f: #d7263d;
+  --grade-f-bg: #fbe1e4;
+
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px rgba(14, 21, 38, 0.06), 0 1px 1px rgba(14, 21, 38, 0.04);
+  --shadow-md: 0 10px 28px rgba(14, 21, 38, 0.1), 0 2px 6px rgba(14, 21, 38, 0.06);
+  --shadow-beacon: 0 4px 16px rgba(232, 163, 61, 0.35);
+
+  /* 서체 */
+  --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Gothic A1', 'Pretendard Variable', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
-.scrollbar-none::-webkit-scrollbar { display: none; }
-.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+:focus-visible {
+  outline: 2px solid var(--accent-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 2px;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 디스플레이/모노 서체 유틸리티 */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum';
+  letter-spacing: -0.02em;
+}
+
+/* 시그니처 요소 — 비콘 점멸 점 (안전 신호를 나타내는 상태 표시) */
+.beacon-dot {
+  position: relative;
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+  flex-shrink: 0;
+}
+.beacon-dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.4;
+  animation: beacon-pulse 2.4s ease-out infinite;
+}
+.beacon-dot--safe {
+  background: var(--grade-a);
+}
+.beacon-dot--warn {
+  background: var(--accent-amber);
+}
+.beacon-dot--danger {
+  background: var(--accent-red);
+}
+.beacon-dot--static::after {
+  display: none;
+}
+
+@keyframes beacon-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beacon-dot::after {
+    animation: none;
+    display: none;
+  }
+}
