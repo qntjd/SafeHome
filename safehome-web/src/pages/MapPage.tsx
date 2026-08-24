@@ -3,16 +3,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import { MapPin } from 'lucide-react'
 import { safetyApi } from '@/api/safety'
-import { crimeApi } from '@/api/crime'
 import type { FacilityResponse } from '@/api/safety'
-import type { DistrictCrimeResponse } from '@/api/crime'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
 import { getFacilityMarkerImage } from '@/utils/mapUtils'
 
 const FACILITY_CONFIG = {
   CCTV:           { color: 'var(--accent-blue)',   label: 'CCTV' },
   EMERGENCY_BELL: { color: 'var(--accent-red)',    label: '비상벨' },
-  STREETLIGHT:    { color: 'var(--accent-amber)',  label: '가로등' },
   POLICE:         { color: 'var(--accent-purple)', label: '경찰서·파출소' },
 }
 
@@ -24,22 +21,9 @@ const GRADE_CONFIG: Record<string, { color: string; bg: string }> = {
   F: { color: 'var(--grade-f)', bg: 'var(--grade-f-bg)' },
 }
 
-const CRIME_TYPE_COLORS: Record<string, string> = {
-  '강력범죄': 'var(--accent-red)',
-  '폭행':     'var(--grade-d)',
-  '절도':     'var(--accent-amber)',
-  '성범죄':   'var(--accent-purple)',
-  '기타':     'var(--text-muted)',
-}
-
-
-type TabType = 'safety' | 'crime'
-
 export default function MapPage() {
   const { position } = useCurrentLocation()
   const [selectedFacility, setSelectedFacility] = useState<FacilityResponse | null>(null)
-  const [selectedDistrict, setSelectedDistrict] = useState<DistrictCrimeResponse | null>(null)
-  const [activeTab, setActiveTab]               = useState<TabType>('safety')
   const [activeTypes, setActiveTypes]           = useState<Set<string>>(
     new Set(['CCTV', 'EMERGENCY_BELL', 'POLICE'])
   )
@@ -86,14 +70,8 @@ export default function MapPage() {
     queryFn:  () => safetyApi.getHeatmap(),
   })
 
-  const { data: crimeData } = useQuery({
-    queryKey: ['crimes'],
-    queryFn:  () => crimeApi.getAllCrimes(),
-  })
-
   const facilityList = (facilities?.data?.data ?? []).filter(f => activeTypes.has(f.type))
   const districts    = heatmap?.data?.data?.districts ?? []
-  const crimes       = crimeData?.data?.data?.districts ?? []
 
   const toggleType = (type: string) => {
     setActiveTypes(prev => {
@@ -101,19 +79,6 @@ export default function MapPage() {
       next.has(type) ? next.delete(type) : next.add(type)
       return next
     })
-  }
-
-  const maxCrimeCount = Math.max(...crimes.map(d => d.totalCount), 1)
-
-  // 저강도(--border-hover) → 고강도(--accent-red) 보간
-  const getCrimeColor = (count: number) => {
-    const intensity = count / maxCrimeCount
-    const from = { r: 195, g: 203, b: 220 } // var(--border-hover)
-    const to   = { r: 215, g: 38,  b: 61  } // var(--accent-red)
-    const r = Math.round(from.r + (to.r - from.r) * intensity)
-    const g = Math.round(from.g + (to.g - from.g) * intensity)
-    const b = Math.round(from.b + (to.b - from.b) * intensity)
-    return `rgba(${r}, ${g}, ${b}, ${0.35 + intensity * 0.45})`
   }
 
   // 내 동네 매칭
@@ -128,9 +93,9 @@ export default function MapPage() {
     myDistrict?.districtName === districtName
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col sm:flex-row h-full">
       {/* 지도 */}
-      <div className="flex-1 relative">
+      <div className="relative h-[45vh] shrink-0 sm:h-full sm:flex-1 sm:shrink">
         <Map
           center={position}
           style={{ width: '100%', height: '100%' }}
@@ -207,236 +172,129 @@ export default function MapPage() {
 
       {/* 사이드바 */}
       <aside
-        className="w-72 flex flex-col shrink-0"
+        className="w-full flex-1 min-h-0 sm:w-72 sm:flex-none sm:shrink-0 flex flex-col"
         style={{ background: 'var(--bg-secondary)', borderLeft: '1px solid var(--border)' }}
       >
-        {/* 탭 */}
-        <div className="flex" style={{ borderBottom: '1px solid var(--border)' }}>
-          {([['safety', '안전점수'], ['crime', '범죄통계']] as [TabType, string][]).map(([tab, label]) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="flex-1 py-3 text-sm font-medium transition-colors"
-              style={{
-                color:        activeTab === tab ? 'var(--accent-blue)' : 'var(--text-muted)',
-                borderBottom: activeTab === tab ? '2px solid var(--accent-blue)' : '2px solid transparent',
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        {/* 헤더 */}
+        <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <h1 className="font-display font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+            안전점수
+          </h1>
         </div>
 
-        {/* 안전점수 탭 */}
-        {activeTab === 'safety' && (
-          <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
 
-            {/* 내 동네 카드 */}
-            {myDistrict && (() => {
-              const gc = GRADE_CONFIG[myDistrict.grade] ?? GRADE_CONFIG.F
-              return (
-                <div className="p-3" style={{ borderBottom: '1px solid var(--border)' }}>
-                  <p className="text-xs mb-2 flex items-center gap-1"
-                    style={{ color: 'var(--accent-blue)' }}>
-                    <MapPin size={12} strokeWidth={2} /> 내 동네
-                  </p>
+          {/* 내 동네 카드 */}
+          {myDistrict && (() => {
+            const gc = GRADE_CONFIG[myDistrict.grade] ?? GRADE_CONFIG.F
+            return (
+              <div className="p-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                <p className="text-xs mb-2 flex items-center gap-1"
+                  style={{ color: 'var(--accent-blue)' }}>
+                  <MapPin size={12} strokeWidth={2} /> 내 동네
+                </p>
+                <div
+                  className="rounded-2xl p-3"
+                  style={{
+                    background: 'rgba(11,110,130,0.08)',
+                    border:     '1px solid rgba(11,110,130,0.2)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {myDistrict.districtName}
+                    </span>
+                    <span
+                      className="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
+                      style={{ color: gc.color, background: gc.bg }}
+                    >
+                      {myDistrict.grade}등급
+                    </span>
+                  </div>
+                  <div className="w-full rounded-full h-1.5 mb-1"
+                    style={{ background: 'var(--bg-hover)' }}>
+                    <div className="h-1.5 rounded-full transition-all"
+                      style={{ width: `${myDistrict.totalScore}%`, background: gc.color }} />
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                      {Math.round(myDistrict.totalScore)}점
+                    </p>
+                    <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                      CCTV {facilityCounts?.data?.data?.cctvCount ?? '--'} · 비상벨 {facilityCounts?.data?.data?.bellCount ?? '--'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* 전체 지역 목록 */}
+          <div className="p-3 flex flex-col gap-2">
+            {districts.length === 0 ? (
+              <div className="flex flex-col gap-2 mt-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl animate-pulse"
+                    style={{ background: 'var(--bg-card)' }} />
+                ))}
+              </div>
+            ) : (
+              districts.map((d) => {
+                const gc     = GRADE_CONFIG[d.grade] ?? GRADE_CONFIG.F
+                const isMine = isMyDistrict(d.districtName)
+                return (
                   <div
+                    key={d.districtCode}
                     className="rounded-2xl p-3"
                     style={{
-                      background: 'rgba(11,110,130,0.08)',
-                      border:     '1px solid rgba(11,110,130,0.2)',
+                      background: 'var(--bg-card)',
+                      border:     `1px solid ${isMine ? 'rgba(11,110,130,0.3)' : 'var(--border)'}`,
                     }}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        {myDistrict.districtName}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {isMine && <MapPin size={11} strokeWidth={2} color="var(--accent-blue)" />}
+                        <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                          {d.districtName}
+                        </span>
+                      </div>
                       <span
                         className="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
                         style={{ color: gc.color, background: gc.bg }}
                       >
-                        {myDistrict.grade}등급
+                        {d.grade}
                       </span>
                     </div>
                     <div className="w-full rounded-full h-1.5 mb-1"
                       style={{ background: 'var(--bg-hover)' }}>
                       <div className="h-1.5 rounded-full transition-all"
-                        style={{ width: `${myDistrict.totalScore}%`, background: gc.color }} />
+                        style={{ width: `${d.totalScore}%`, background: gc.color }} />
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                        {Math.round(myDistrict.totalScore)}점
-                      </p>
-                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                        CCTV {facilityCounts?.data?.data?.cctvCount ?? '--'} · 비상벨 {facilityCounts?.data?.data?.bellCount ?? '--'}
-                      </p>
-                    </div>
+                    <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                      {Math.round(d.totalScore)}점
+                    </p>
                   </div>
-                </div>
-              )
-            })()}
-
-            {/* 전체 지역 목록 */}
-            <div className="p-3 flex flex-col gap-2">
-              {districts.length === 0 ? (
-                <div className="flex flex-col gap-2 mt-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-16 rounded-xl animate-pulse"
-                      style={{ background: 'var(--bg-card)' }} />
-                  ))}
-                </div>
-              ) : (
-                districts.map((d) => {
-                  const gc     = GRADE_CONFIG[d.grade] ?? GRADE_CONFIG.F
-                  const isMine = isMyDistrict(d.districtName)
-                  return (
-                    <div
-                      key={d.districtCode}
-                      className="rounded-2xl p-3"
-                      style={{
-                        background: 'var(--bg-card)',
-                        border:     `1px solid ${isMine ? 'rgba(11,110,130,0.3)' : 'var(--border)'}`,
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5">
-                          {isMine && <MapPin size={11} strokeWidth={2} color="var(--accent-blue)" />}
-                          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                            {d.districtName}
-                          </span>
-                        </div>
-                        <span
-                          className="text-xs font-bold font-mono px-2 py-0.5 rounded-full"
-                          style={{ color: gc.color, background: gc.bg }}
-                        >
-                          {d.grade}
-                        </span>
-                      </div>
-                      <div className="w-full rounded-full h-1.5 mb-1"
-                        style={{ background: 'var(--bg-hover)' }}>
-                        <div className="h-1.5 rounded-full transition-all"
-                          style={{ width: `${d.totalScore}%`, background: gc.color }} />
-                      </div>
-                      <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                        {Math.round(d.totalScore)}점
-                      </p>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 범죄통계 탭 */}
-        {activeTab === 'crime' && (
-          <div className="flex-1 overflow-y-auto">
-            {!selectedDistrict && (
-              <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                지역을 클릭하면 상세 통계를 볼 수 있어요
-              </p>
+                )
+              })
             )}
-            <div className="p-3 flex flex-col gap-2">
-              {crimes
-                .sort((a, b) => b.totalCount - a.totalCount)
-                .map((district) => (
-                <div
-                  key={district.districtCode}
-                  onClick={() => setSelectedDistrict(
-                    selectedDistrict?.districtCode === district.districtCode ? null : district
-                  )}
-                  className="rounded-2xl p-3 cursor-pointer transition-all"
-                  style={{
-                    background: selectedDistrict?.districtCode === district.districtCode
-                      ? 'var(--accent-red-soft)' : 'var(--bg-card)',
-                    border: `1px solid ${selectedDistrict?.districtCode === district.districtCode
-                      ? 'rgba(215,38,61,0.3)' : 'var(--border)'}`,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {district.districtName}
-                    </span>
-                    <span className="text-xs font-bold font-mono" style={{ color: 'var(--accent-red)' }}>
-                      {district.totalCount.toLocaleString()}건
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--bg-hover)' }}>
-                    <div
-                      className="h-1.5 rounded-full"
-                      style={{
-                        width:      `${(district.totalCount / maxCrimeCount) * 100}%`,
-                        background: getCrimeColor(district.totalCount),
-                      }}
-                    />
-                  </div>
-                  {selectedDistrict?.districtCode === district.districtCode && (
-                    <div className="mt-3 flex flex-col gap-1.5">
-                      {Object.entries(district.crimeByType)
-                        .sort(([, a], [, b]) => b - a)
-                        .map(([type, count]) => (
-                        <div key={type} className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full"
-                              style={{ background: CRIME_TYPE_COLORS[type] ?? 'var(--text-muted)' }} />
-                            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                              {type}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-1 rounded-full"
-                              style={{
-                                width:      `${(count / district.totalCount) * 60}px`,
-                                background: CRIME_TYPE_COLORS[type] ?? 'var(--text-muted)',
-                                opacity:    0.6,
-                              }}
-                            />
-                            <span className="text-xs font-mono font-medium" style={{ color: 'var(--text-primary)' }}>
-                              {count.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
-        )}
+        </div>
 
         {/* 범례 — 하단 SOS/음성감지 플로팅 버튼에 안 가리게 여유 확보 */}
         <div className="p-4 pb-28" style={{ borderTop: '1px solid var(--border)' }}>
-          {activeTab === 'safety' ? (
-            <>
-              <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>시설 종류</p>
-              <div className="flex flex-col gap-2">
-                {Object.entries(FACILITY_CONFIG).map(([type, cfg]) => (
-                  <div key={type} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full"
-                      style={{ background: cfg.color, opacity: activeTypes.has(type) ? 1 : 0.3 }} />
-                    <span className="text-xs"
-                      style={{ color: activeTypes.has(type) ? 'var(--text-secondary)' : 'var(--text-muted)' }}>
-                      {cfg.label}
-                    </span>
-                  </div>
-                ))}
+          <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>시설 종류</p>
+          <div className="flex flex-col gap-2">
+            {Object.entries(FACILITY_CONFIG).map(([type, cfg]) => (
+              <div key={type} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full"
+                  style={{ background: cfg.color, opacity: activeTypes.has(type) ? 1 : 0.3 }} />
+                <span className="text-xs"
+                  style={{ color: activeTypes.has(type) ? 'var(--text-secondary)' : 'var(--text-muted)' }}>
+                  {cfg.label}
+                </span>
               </div>
-            </>
-          ) : (
-            <>
-              <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>범죄 유형</p>
-              <div className="flex flex-col gap-2">
-                {Object.entries(CRIME_TYPE_COLORS).map(([type, color]) => (
-                  <div key={type} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ background: color }} />
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{type}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+            ))}
+          </div>
         </div>
       </aside>
     </div>

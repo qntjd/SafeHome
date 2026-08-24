@@ -72,7 +72,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        // 같은 Wi-Fi의 폰 등에서 로컬 개발서버(Vite)로 접속해 테스트할 수 있도록 사설 IP 대역도 허용한다.
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "http://192.168.*.*:5173",
+                "http://10.*.*.*:5173"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

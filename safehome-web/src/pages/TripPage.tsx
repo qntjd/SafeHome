@@ -222,9 +222,9 @@ export default function TripPage() {
 
   if (activeTrip) {
     return (
-      <div className="flex h-full">
+      <div className="flex flex-col sm:flex-row h-full">
         {/* 귀가 중 지도 */}
-        <div className="flex-1 relative">
+        <div className="relative h-[40vh] shrink-0 sm:h-full sm:flex-1 sm:shrink">
           <Map
             center={position}
             style={{ width: '100%', height: '100%' }}
@@ -352,7 +352,7 @@ export default function TripPage() {
 
         {/* 귀가 현황 사이드바 */}
         <aside
-          className="w-80 flex flex-col shrink-0"
+          className="w-full flex-1 min-h-0 overflow-y-auto sm:w-80 sm:flex-none sm:shrink-0 sm:overflow-visible flex flex-col"
           style={{ background: 'var(--bg-secondary)', borderLeft: '1px solid var(--border)' }}
         >
 
@@ -397,10 +397,10 @@ export default function TripPage() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col sm:flex-row h-full">
       {/* 사이드바 */}
       <aside
-        className="w-80 flex flex-col shrink-0"
+        className="w-full flex-1 min-h-0 overflow-y-auto sm:w-80 sm:flex-none sm:shrink-0 sm:overflow-visible flex flex-col"
         style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border)' }}
       >
         {/* 헤더 */}
@@ -741,7 +741,7 @@ export default function TripPage() {
       </aside>
 
       {/* 지도 */}
-      <div className="flex-1 relative">
+      <div className="relative h-[40vh] shrink-0 sm:h-full sm:flex-1 sm:shrink">
         <Map
           center={selectedPlace ? { lat: selectedPlace.lat, lng: selectedPlace.lng } : position}
           style={{ width: '100%', height: '100%' }}
