@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F1117">
+
+    <!-- 도트 그리드 -->
+    <com.safehome.app.ui.SplashDotGridView
+        android:id="@+id/dotGridView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- 콘텐츠 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- 원 + 로고 -->
+        <FrameLayout
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_marginBottom="24dp">
+
+
+
+            <!-- 원 SVG -->
+            <ImageView
+                android:id="@+id/ivCircleRing"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:src="@drawable/splash_circle_anim"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
+
+            <!-- 로고 -->
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_safehome_logo"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
+        </FrameLayout>
+
+        <!-- 앱 이름 -->
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SafeHome"
+            android:textSize="36sp"
+            android:textColor="#F0F2F8"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="8dp"
+            android:visibility="invisible"/>
+
+        <!-- 슬로건 -->
+        <TextView
+            android:id="@+id/tvSlogan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1인 가구 안심 생활 플랫폼"
+            android:textSize="14sp"
+            android:textColor="#555A70"
+            android:layout_marginBottom="60dp"
+            android:visibility="invisible"/>
+
+        <!-- 로딩 점 -->
+        <LinearLayout
+            android:id="@+id/layoutDots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="invisible">
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_dot_blue"/>
+
+            <View
+                android:id="@+id/dot2"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_dot_blue"/>
+
+            <View
+                android:id="@+id/dot3"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_dot_blue"/>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

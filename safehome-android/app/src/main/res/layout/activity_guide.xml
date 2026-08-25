@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0F1117">
+
+    <!-- 헤더 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:paddingTop="52dp"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginEnd="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SAFE HOME 사용 가이드"
+            android:textSize="20sp"
+            android:textColor="#F0F2F8"
+            android:textStyle="bold"/>
+    </LinearLayout>
+    <!-- 데이터 출처 안내 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:padding="16dp"
+        android:text="ℹ️ 본 애플리케이션은 경찰청, 행정안전부 등에서 제공하는 공공 API를 활용하여 제작되었으며, 국가가 아닌 개인이 만든 앱입니다.\n\n현재 2024년도 데이터를 기준으로 제공하고 있으며, 추후 데이터가 업데이트될 경우 반영할 계획입니다. 실제 정보와 다소 차이가 있을 수 있습니다."
+        android:textSize="12sp"
+        android:textColor="#555A70"
+        android:lineSpacingExtra="3dp"
+        android:gravity="center"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- 안심 귀가 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🚶 안심 귀가"
+                        android:textSize="17sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="목적지와 예상 도착 시간을 설정하면, 시간이 지나도 도착하지 않을 경우 비상연락처에 자동으로 알림이 전송돼요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 안전 지도 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🗺 안전 지도"
+                        android:textSize="17sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="주변 CCTV, 비상벨, 지구대 등 안전시설 위치와 지역별 범죄 통계를 지도에서 한눈에 확인할 수 있어요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 재난 알림 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔔 재난 알림"
+                        android:textSize="17sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="내 지역을 구독하면 재난문자, 안전 뉴스를 실시간으로 받아볼 수 있어요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 뉴스 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📰 안전 뉴스"
+                        android:textSize="17sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1인 가구 안전과 관련된 최신 뉴스와 정보를 모아서 보여드려요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- SOS 설정 강조 카드 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#2A1518"
+                app:strokeColor="#F87171"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🚨 SOS, 지금 켜두셨나요?"
+                        android:textSize="18sp"
+                        android:textColor="#F87171"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="진짜 위급한 순간엔 앱을 열고 버튼을 찾을 시간이 없어요.\n\n설정에서 미리 켜두면 이렇게 작동해요:"
+                        android:textSize="14sp"
+                        android:textColor="#F0F2F8"
+                        android:lineSpacingExtra="3dp"
+                        android:layout_marginBottom="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎙 음성 SOS 감지"
+                        android:textSize="14sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="'살려줘', '도와줘' 라고만 말해도 자동으로 SOS가 발동돼요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔒 잠금화면 SOS 버튼"
+                        android:textSize="14sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="앱을 열지 않고 잠금화면에서 바로 SOS를 누를 수 있어요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📞 112 자동신고 (고급 기능)"
+                        android:textSize="14sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="카운트다운이 끝나면 112로 자동으로 전화가 연결돼요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="14dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👉 설정 화면에서 지금 바로 켜보세요."
+                        android:textSize="13sp"
+                        android:textColor="#F87171"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

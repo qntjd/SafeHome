@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0F1117">
+
+    <!-- 헤더 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:paddingTop="52dp"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginEnd="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="생활 안전 정보"
+            android:textSize="20sp"
+            android:textColor="#F0F2F8"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- ===== 섹션 1: 휴대폰 자체 SOS ===== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📱 내 휴대폰에도 긴급 SOS 기능이 이미 있어요"
+                android:textSize="17sp"
+                android:textColor="#F0F2F8"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="갤럭시 (One UI 5.0 / 안드로이드 13 이상)"
+                        android:textSize="14sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="설정 → 안전 및 긴급 → 긴급 SOS 에서 켤 수 있어요. 측면 버튼을 빠르게 5번 누르면 112 등 긴급 전화가 자동으로 연결돼요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- STEP 1 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="① 설정 → 안전 및 긴급"
+                        android:textSize="12sp"
+                        android:textColor="#555A70"
+                        android:layout_marginBottom="8dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#0F1117">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/galaxy_sos_step1"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- STEP 2 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="② 안전 및 긴급 → 긴급 SOS"
+                        android:textSize="12sp"
+                        android:textColor="#555A70"
+                        android:layout_marginBottom="8dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#0F1117">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/galaxy_sos_step2"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- STEP 3 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="③ 카운트다운, 긴급 연락처 등 설정"
+                        android:textSize="12sp"
+                        android:textColor="#555A70"
+                        android:layout_marginBottom="8dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#0F1117">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/galaxy_sos_step3"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"/>
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="28dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="아이폰"
+                        android:textSize="14sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="설정 → 긴급 구조 요청에서 켤 수 있어요. 측면 버튼을 빠르게 5번 누르거나 측면+음량 버튼을 함께 길게 누르면 카운트다운 후 자동으로 전화가 연결되고, 등록해둔 긴급 연락처에 위치가 공유돼요."
+                        android:textSize="13sp"
+                        android:textColor="#8B90A7"
+                        android:lineSpacingExtra="2dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- STEP 1: 설정에서 위치 찾기 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="① 설정 → 긴급 구조 요청"
+                        android:textSize="12sp"
+                        android:textColor="#555A70"
+                        android:layout_marginBottom="8dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#0F1117">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/iphone_sos_step1"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- STEP 2: 상세 설정 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="② 버튼 방식 선택 후 켜기"
+                        android:textSize="12sp"
+                        android:textColor="#555A70"
+                        android:layout_marginBottom="8dp"/>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#0F1117">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/iphone_sos_step2"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"/>
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== 섹션 2: 개인정보 보호 ===== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔒 개인정보 보호 서비스"
+                android:textSize="17sp"
+                android:textColor="#F0F2F8"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="내 정보가 안전한지 정부·공공기관 서비스로 확인해보세요"
+                android:textSize="12sp"
+                android:textColor="#555A70"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 명의도용방지 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/linkMsafer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="과학기술정보통신부"
+                        android:textSize="11sp"
+                        android:textColor="#4F7EF8"
+                        android:background="#1A2440"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="명의도용방지 서비스"
+                        android:textSize="15sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="내 명의로 개통된 휴대폰 전체 조회 및 신규 개통 차단"
+                        android:textSize="12sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="msafer.or.kr →"
+                        android:textSize="13sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 페이인포 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/linkPayinfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="금융결제원"
+                        android:textSize="11sp"
+                        android:textColor="#FBBF24"
+                        android:background="#2A2010"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="페이인포"
+                        android:textSize="15sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="내 명의의 카드, 계좌, 간편결제 서비스 한번에 조회"
+                        android:textSize="12sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="payinfo.or.kr →"
+                        android:textSize="13sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 크레딧포유 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/linkCreditinfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="한국신용정보원"
+                        android:textSize="11sp"
+                        android:textColor="#FBBF24"
+                        android:background="#2A2010"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="크레딧포유"
+                        android:textSize="15sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="대출, 보증 등 금융거래 정보 조회 및 명의도용 확인"
+                        android:textSize="12sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="creditinfo.or.kr →"
+                        android:textSize="13sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 개인정보 포털 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/linkPrivacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="개인정보보호위원회"
+                        android:textSize="11sp"
+                        android:textColor="#F472B6"
+                        android:background="#2A1520"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="개인정보 포털"
+                        android:textSize="15sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="공공기관의 내 개인정보 열람 및 처리 현황 확인"
+                        android:textSize="12sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="privacy.go.kr →"
+                        android:textSize="13sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 정부24 -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/linkGov"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E2130">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="행정안전부"
+                        android:textSize="11sp"
+                        android:textColor="#A78BFA"
+                        android:background="#201A30"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="정부24"
+                        android:textSize="15sp"
+                        android:textColor="#F0F2F8"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="공공서비스 가입 및 개인정보 제공 내역 조회"
+                        android:textSize="12sp"
+                        android:textColor="#8B90A7"
+                        android:layout_marginBottom="10dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="gov.kr →"
+                        android:textSize="13sp"
+                        android:textColor="#4F7EF8"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
