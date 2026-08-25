@@ -207,7 +207,7 @@ safehome/
 │       ├── crime_stat_collector.py     # 2020~2024년 다중 연도 수집
 │       └── news_collector.py
 │
-└── SafeHome (Android)/           # Kotlin 안드로이드 앱
+└── safehome-android/              # Kotlin 안드로이드 앱
     └── app/src/main/java/com/safehome/app/
         ├── ui/                   # home·map·alert·crime·guide·trip·settings
         ├── service/               # 음성감지·영상녹화·위치추적 Foreground Service
