@@ -70,15 +70,16 @@ export default function DashboardPage() {
       style={{ background: 'linear-gradient(165deg, #0a0e1f 0%, #04050c 75%)' }}
     >
       {/* 참고 시안의 지구본처럼, 등대를 우측 상단에 크게 배치 — 화면 전체를 균일하게
-          덮는 대신 오른쪽 한켠에 자리 잡고 카드들이 그 위/왼쪽으로 떠 있는 구도 */}
+          덮는 대신 오른쪽 한켠에 자리 잡고 카드들이 그 위/왼쪽으로 떠 있는 구도.
+          모바일에서는 작게, 데스크톱으로 갈수록 크게 반응형 사이징 */}
       <div
-        className="absolute pointer-events-none"
-        style={{ right: '-8%', top: '-4%', width: 620, height: 620, opacity: 0.9 }}
+        className="absolute pointer-events-none w-[320px] h-[320px] sm:w-[440px] sm:h-[440px] lg:w-[560px] lg:h-[560px] xl:w-[640px] xl:h-[640px]"
+        style={{ right: '-8%', top: '-4%', opacity: 0.9 }}
       >
         <Lighthouse fill />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-7 relative">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-7 relative lg:mx-0 lg:ml-10 xl:ml-16 2xl:ml-24">
 
           {/* 인사말 — 헤더와 본문을 하나로 합쳐서, 등대 배경 위에 바로 놓임 */}
           <div className="relative mb-5">

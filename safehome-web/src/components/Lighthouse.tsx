@@ -53,6 +53,7 @@ export default function Lighthouse({ size = 240, fill = false, className }: Ligh
 
     // ---------- Lighthouse point cloud (same technique as a dot globe) ----------
     const darkColor = new THREE.Color(0x0c1230)
+    const whiteColor = new THREE.Color(0xffffff)
     const creamColor = new THREE.Color(0xeef1fb)
     const amberColor = new THREE.Color(0xffb347)
     const lampColor = new THREE.Color(0xfff2d6)
@@ -91,7 +92,7 @@ export default function Lighthouse({ size = 240, fill = false, className }: Ligh
     }
 
     // 받침대
-    addFrustumPoints({ count: 260, rBottom: 0.78, rTop: 0.62, height: 0.42, centerY: -1.35, color: darkColor })
+    addFrustumPoints({ count: 260, rBottom: 0.78, rTop: 0.62, height: 0.42, centerY: -1.35, color: whiteColor })
 
     // 몸통 (탑) — 특정 높이 구간은 앰버 줄무늬
     addFrustumPoints({
@@ -114,7 +115,7 @@ export default function Lighthouse({ size = 240, fill = false, className }: Ligh
     addFrustumPoints({ count: 240, rBottom: 0.26, rTop: 0.26, height: 0.34, centerY: 1.05, color: lampColor })
 
     // 지붕
-    addFrustumPoints({ count: 260, rBottom: 0.42, rTop: 0.0, height: 0.4, centerY: 1.45, color: darkColor })
+    addFrustumPoints({ count: 260, rBottom: 0.42, rTop: 0.0, height: 0.4, centerY: 1.45, color: whiteColor })
 
     const lhGeo = new THREE.BufferGeometry()
     lhGeo.setAttribute('position', new THREE.Float32BufferAttribute(lhPositions, 3))
