@@ -4,15 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0F1117">
+    android:background="#0B0D12">
 
     <!-- 헤더 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="20dp"
+        android:paddingHorizontal="20dp"
         android:paddingTop="52dp"
+        android:paddingBottom="20dp"
         android:gravity="center_vertical">
 
         <ImageButton
@@ -27,8 +28,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="설정"
-            android:textSize="22sp"
-            android:textColor="#F0F2F8"
+            android:textSize="20sp"
+            android:textColor="#F5F6FA"
             android:textStyle="bold"/>
     </LinearLayout>
 
@@ -40,15 +41,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="32dp">
 
             <!-- 프로필 카드 -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="20dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#1C1F2A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -57,20 +60,20 @@
                     android:padding="20dp"
                     android:gravity="center_vertical">
 
-                    <!-- 프로필 아이콘 -->
                     <androidx.cardview.widget.CardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardCornerRadius="28dp"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        app:cardCornerRadius="26dp"
                         app:cardBackgroundColor="#4F7EF8"
-                        android:layout_marginEnd="16dp">
+                        app:cardElevation="0dp"
+                        android:layout_marginEnd="14dp">
 
                         <TextView
                             android:id="@+id/tvProfileInitial"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="S"
-                            android:textSize="22sp"
+                            android:textSize="20sp"
                             android:textColor="#FFFFFF"
                             android:textStyle="bold"
                             android:gravity="center"/>
@@ -87,8 +90,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="닉네임"
-                            android:textSize="17sp"
-                            android:textColor="#F0F2F8"
+                            android:textSize="16sp"
+                            android:textColor="#F5F6FA"
                             android:textStyle="bold"/>
 
                         <TextView
@@ -96,8 +99,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="email@example.com"
-                            android:textSize="13sp"
-                            android:textColor="#555A70"/>
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -108,20 +112,65 @@
                 android:layout_height="wrap_content"
                 android:text="비상연락처"
                 android:textSize="13sp"
-                android:textColor="#555A70"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <!-- 헤더: 아이콘 + 제목 + 설명 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:src="@drawable/icon_emergency_contacts"
+                            android:layout_marginEnd="14dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="비상연락처 관리"
+                                android:textSize="15sp"
+                                android:textColor="#F5F6FA"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="SOS 발동 시 문자를 받을 사람을 등록해요"
+                                android:textSize="12sp"
+                                android:textColor="#8B90A7"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:background="#2A2D3A"/>
 
                     <!-- 연락처 목록 -->
                     <LinearLayout
@@ -134,17 +183,17 @@
                     <LinearLayout
                         android:id="@+id/btnAddContact"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="52dp"
                         android:orientation="horizontal"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:background="?attr/selectableItemBackground">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="+ 연락처 추가"
                             android:textSize="14sp"
-                            android:textColor="#4F7EF8"
+                            android:textColor="#E8A33D"
                             android:textStyle="bold"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -156,211 +205,337 @@
                 android:layout_height="wrap_content"
                 android:text="앱 설정"
                 android:textSize="13sp"
-                android:textColor="#555A70"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
 
+            <!-- 음성 SOS 감지 -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="12dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                    <!-- 음성 감지 토글 -->
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/icon_voice_sos"
+                        android:layout_marginEnd="14dp"/>
+
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:text="음성 SOS 감지"
                             android:textSize="15sp"
-                            android:textColor="#F0F2F8"/>
-
-                        <Switch
-                            android:id="@+id/switchVoice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"/>
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#0D0F1A"
-                        android:layout_marginHorizontal="16dp"/>
-
-                    <!-- 알림 토글 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
+                            android:textColor="#F5F6FA"
+                            android:textStyle="bold"/>
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="재난 알림 수신"
-                            android:textSize="15sp"
-                            android:textColor="#F0F2F8"/>
-
-                        <Switch
-                            android:id="@+id/switchAlert"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"/>
+                            android:text="'살려줘', '도와줘' 등 키워드를 자동으로 감지해요"
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#0D0F1A"
-                        android:layout_marginHorizontal="16dp"/>
-
-                    <!-- 야간 모드 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="야간 안전 모드"
-                            android:textSize="15sp"
-                            android:textColor="#F0F2F8"/>
-
-                        <Switch
-                            android:id="@+id/switchNight"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"/>
-                    </LinearLayout>
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#0D0F1A"
-                        android:layout_marginHorizontal="16dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="잠금화면 SOS 버튼"
-                                android:textSize="15sp"
-                                android:textColor="#F0F2F8"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="잠금화면에 SOS 버튼을 항상 표시"
-                                android:textSize="11sp"
-                                android:textColor="#555A70"/>
-                        </LinearLayout>
-
-                        <Switch
-                            android:id="@+id/switchLockScreen"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-                    </LinearLayout>
+                    <Switch
+                        android:id="@+id/switchVoice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-            <!--- 고급 기능 섹션 -->
+
+            <!-- 재난 알림 수신 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/icon_disaster_alert"
+                        android:layout_marginEnd="14dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="재난 알림 수신"
+                            android:textSize="15sp"
+                            android:textColor="#F5F6FA"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="내 지역뿐만 아니라 부모님,친구의 지역도 재난문자를 실시간으로 받을수 있어요"
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switchAlert"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 야간 안전 모드 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/icon_night_mode"
+                        android:layout_marginEnd="14dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="야간 안전 모드"
+                            android:textSize="15sp"
+                            android:textColor="#F5F6FA"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="밤 10시~오전 6시, 음성감지·SOS를 자동으로 강화해요"
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switchNight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 잠금화면 SOS 버튼 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/icon_lockscreen_sos"
+                        android:layout_marginEnd="14dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="잠금화면 SOS 버튼"
+                            android:textSize="15sp"
+                            android:textColor="#F5F6FA"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="잠금화면에서 앱을 열지 않고 바로 SOS를 보낼 수 있어요"
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switchLockScreen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 고급 기능 섹션 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="고급 기능"
                 android:textSize="13sp"
-                android:textColor="#555A70"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/icon_112_report"
+                        android:layout_marginEnd="14dp"/>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="112 자동신고"
-                                android:textSize="15sp"
-                                android:textColor="#F0F2F8"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="SOS 카운트다운 종료시 112에 자동으로 전화를 겁니다"
-                                android:textSize="11sp"
-                                android:textColor="#555A70"/>
-                        </LinearLayout>
-                        <Switch
-                            android:id="@+id/switchAutoPoliceReport"
+                        <TextView
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:text="112 자동신고"
+                            android:textSize="15sp"
+                            android:textColor="#F5F6FA"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SOS 카운트다운이 끝나면 112로 자동 전화를 걸어요"
+                            android:textSize="12sp"
+                            android:textColor="#8B90A7"
+                            android:layout_marginTop="2dp"/>
                     </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switchAutoPoliceReport"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+            <!-- SOS 이력 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SOS 이력"
+                android:textSize="13sp"
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#16203A"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:id="@+id/btnSosLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="발동 이력 확인"
+                        android:textSize="14sp"
+                        android:textColor="#F5F6FA"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="#4A4E5E"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- 녹음 파일 섹션 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SOS 녹음 파일"
                 android:textSize="13sp"
-                android:textColor="#555A70"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#1C1F2A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -376,10 +551,10 @@
                     <TextView
                         android:id="@+id/tvNoRecordings"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="52dp"
                         android:text="저장된 녹음 파일이 없어요"
                         android:textSize="13sp"
-                        android:textColor="#555A70"
+                        android:textColor="#8B90A7"
                         android:gravity="center"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -390,15 +565,16 @@
                 android:layout_height="wrap_content"
                 android:text="계정"
                 android:textSize="13sp"
-                android:textColor="#555A70"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#8B90A7"
+                android:layout_marginBottom="10dp"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1E2130">
+                app:cardBackgroundColor="#1C1F2A"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -408,46 +584,48 @@
                     <LinearLayout
                         android:id="@+id/btnChangeNickname"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="52dp"
                         android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="닉네임 변경"
-                            android:textSize="15sp"
-                            android:textColor="#F0F2F8"/>
+                            android:textSize="14sp"
+                            android:textColor="#F5F6FA"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="›"
-                            android:textSize="20sp"
-                            android:textColor="#555A70"/>
+                            android:textSize="18sp"
+                            android:textColor="#4A4E5E"/>
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#0D0F1A"
-                        android:layout_marginHorizontal="16dp"/>
+                        android:background="#2A2D3A"
+                        android:layout_marginStart="16dp"/>
 
                     <LinearLayout
                         android:id="@+id/btnLogout"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="52dp"
                         android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="로그아웃"
-                            android:textSize="15sp"
+                            android:textSize="14sp"
                             android:textColor="#F87171"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -459,8 +637,9 @@
                 android:layout_height="wrap_content"
                 android:text="SafeHome v1.0.0"
                 android:textSize="12sp"
-                android:textColor="#555A70"
-                android:gravity="center"/>
+                android:textColor="#4A4E5E"
+                android:gravity="center"
+                android:layout_marginTop="4dp"/>
 
         </LinearLayout>
     </ScrollView>

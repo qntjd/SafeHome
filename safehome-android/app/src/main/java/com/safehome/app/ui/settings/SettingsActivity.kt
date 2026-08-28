@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -45,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         setupAccount()
         setupRecordings()
     }
+
 
 
     private fun setupProfile() {
@@ -108,45 +110,102 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showAddContactDialog() {
-        val dialogView = LinearLayout(this).apply {
+        val context = this
+
+        val dialogLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(48, 32, 48, 16)
+            setPadding(48, 40, 48, 8)
         }
 
-        val etName = EditText(this).apply {
-            hint = "이름"
-            setTextColor(0xFFF0F2F8.toInt())
-            setHintTextColor(0xFF555A70.toInt())
-        }
-        val etPhone = EditText(this).apply {
-            hint = "전화번호"
-            inputType = android.text.InputType.TYPE_CLASS_PHONE
-            setTextColor(0xFFF0F2F8.toInt())
-            setHintTextColor(0xFF555A70.toInt())
+        val titleTv = TextView(context).apply {
+            text = "비상연락처 추가"
+            textSize = 18f
+            setTextColor(0xFFF5F6FA.toInt())
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(0, 0, 0, 24)
         }
 
-        dialogView.addView(etName)
-        dialogView.addView(etPhone)
+        fun makeInputField(hintText: String, inputType: Int, digitsOnly: Boolean = false): EditText {
+            return EditText(context).apply {
+                hint = hintText
+                this.inputType = inputType
+                textSize = 15f
+                setTextColor(0xFFF5F6FA.toInt())
+                setHintTextColor(0xFF8B90A7.toInt())
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(android.graphics.Color.parseColor("#0E1526"))
+                    cornerRadius = 24f
+                }
+                setPadding(36, 28, 36, 28)
 
-        AlertDialog.Builder(this)
-            .setTitle("연락처 추가")
-            .setView(dialogView)
+                if (digitsOnly) {
+                    keyListener = android.text.method.DigitsKeyListener.getInstance("0123456789")
+                    filters = arrayOf(android.text.InputFilter.LengthFilter(11))
+                }
+
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 0, 0, 16) }
+                layoutParams = params
+            }
+        }
+
+        val etName = makeInputField("이름 (예: 엄마)", android.text.InputType.TYPE_CLASS_TEXT)
+        val etPhone = makeInputField("전화번호 (예: 01012345678)", android.text.InputType.TYPE_CLASS_PHONE, digitsOnly = true)
+
+        dialogLayout.addView(titleTv)
+        dialogLayout.addView(etName)
+        dialogLayout.addView(etPhone)
+
+        val dialog = AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert)
+            .setView(dialogLayout)
             .setPositiveButton("추가") { _, _ ->
                 val name = etName.text.toString().trim()
-                val phone = etPhone.text.toString().trim()
-                if (name.isNotEmpty() && phone.isNotEmpty()) {
-                    contacts.add(Pair(name, phone))
-                    tokenManager.saveContacts(contacts)  // 저장 추가
-                    refreshContactList()
+                val phone = etPhone.text.toString().trim().replace("-", "")
+
+                when {
+                    name.isEmpty() -> {
+                        Toast.makeText(context, "이름을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    }
+                    phone.isEmpty() -> {
+                        Toast.makeText(context, "전화번호를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    }
+                    !isValidPhoneNumber(phone) -> {
+                        Toast.makeText(context, "올바른 휴대폰 번호 형식이 아니에요 (예: 01012345678)", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        contacts.add(Pair(name, phone))
+                        tokenManager.saveContacts(contacts)
+                        refreshContactList()
+                    }
                 }
             }
             .setNegativeButton("취소", null)
-            .show()
+            .create()
 
+        dialog.show()
+
+        // 다이얼로그 배경 및 버튼 색상 커스터마이징
+        dialog.window?.setBackgroundDrawable(
+            android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.parseColor("#16203A"))
+                cornerRadius = 32f
+            }
+        )
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(android.graphics.Color.parseColor("#E8A33D"))
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(android.graphics.Color.parseColor("#8B90A7"))
+    }
+
+    private fun isValidPhoneNumber(phone: String): Boolean {
+        // 010, 011, 016, 017, 018, 019로 시작하고 총 10~11자리 숫자
+        val regex = Regex("^01[016789]\\d{7,8}$")
+        return regex.matches(phone)
     }
 
 
     private fun setupSettings() {
+        binding.switchVoice.isChecked = tokenManager.isVoiceDetectionEnabled()
         binding.switchVoice.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 // 켤 때 안내 팝업
@@ -155,13 +214,24 @@ class SettingsActivity : AppCompatActivity() {
                     .setMessage(
                         "음성 SOS 감지 기능을 켜시겠습니까?\n\n" +
                                 "이 기능은 '살려줘', '도와줘' 등의 키워드를 감지하면 " +
-                                "즉시 비상연락처로 문자를 발송합니다.\n\n" +
+                                "즉시 비상연락처로 문자를 발송하고 영상을 녹화합니다.\n\n" +
                                 "⚠️ 주의사항\n" +
                                 "• 오감지 시 비상연락처에 문자가 발송될 수 있습니다.\n" +
                                 "• 생명에 위급한 상황이 아니면 기능을 꺼놓는 것을 권장합니다.\n" +
                                 "• 배터리 소모가 증가할 수 있습니다."
                     )
                     .setPositiveButton("켜기") { _, _ ->
+                        val missingPermissions = mutableListOf<String>()
+                        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                            != PackageManager.PERMISSION_GRANTED){
+                            missingPermissions.add(Manifest.permission.CAMERA)
+                        }
+                        if (missingPermissions.isNotEmpty()) {
+                            ActivityCompat.requestPermissions(
+                                this, missingPermissions.toTypedArray(), 400
+                            )
+                        }
+                        tokenManager.saveVoiceDetectionEnabled(true)
                         startForegroundService(Intent(this, VoiceDetectionService::class.java))
                     }
                     .setNegativeButton("취소") { _, _ ->
@@ -170,6 +240,7 @@ class SettingsActivity : AppCompatActivity() {
                     .setCancelable(false)
                     .show()
             } else {
+                tokenManager.saveVoiceDetectionEnabled(false)
                 stopService(Intent(this, VoiceDetectionService::class.java))
             }
         }
@@ -187,11 +258,22 @@ class SettingsActivity : AppCompatActivity() {
                                 "• 확실하지 않다면 기능을 꺼두는 것을 권장합니다."
                     )
                     .setPositiveButton("켜기") { _, _ ->
+                        val missingPermissions = mutableListOf<String>()
                         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                             != PackageManager.PERMISSION_GRANTED) {
                             ActivityCompat.requestPermissions(
                                 this, arrayOf(Manifest.permission.CALL_PHONE), 200
                             )
+                        }
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                            != PackageManager.PERMISSION_GRANTED) {
+                            missingPermissions.add(Manifest.permission.CAMERA)
+                        }
+                        if(missingPermissions.isNotEmpty()) {
+                            ActivityCompat.requestPermissions(
+                                this, missingPermissions.toTypedArray(), 200
+                            )
+
                         }
                         tokenManager.saveAutoPoliceReport(true)
                     }
@@ -226,6 +308,10 @@ class SettingsActivity : AppCompatActivity() {
             } else {
                 NightModeManager.deactivate(this)
             }
+        }
+
+        binding.btnSosLog.setOnClickListener {
+            startActivity(Intent(this, com.safehome.app.ui.sos.SosLogActivity::class.java))
         }
     }
 

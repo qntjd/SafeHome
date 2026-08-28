@@ -34,6 +34,10 @@ import com.google.android.gms.location.LocationServices
 import com.safehome.app.api.AlertApi
 import com.safehome.app.api.RetrofitClient
 import com.safehome.app.model.SubscribeRequest
+import com.safehome.app.model.SosRecipientRequest
+import com.safehome.app.model.SosCreateLogRequest
+import com.safehome.app.api.SosApi
+import com.safehome.app.util.SosLocationHelper
 
 
 class HomeActivity : AppCompatActivity() {
@@ -43,6 +47,8 @@ class HomeActivity : AppCompatActivity() {
 
     private val alertApi by lazy { RetrofitClient.create(AlertApi::class.java) }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val sosApi by lazy { RetrofitClient.create(SosApi::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -201,16 +207,35 @@ class HomeActivity : AppCompatActivity() {
 
     private fun sendSosAlerts(recordingPath: String? = null) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val lat = TripTrackingService.currentLat
-            val lng = TripTrackingService.currentLng
+            val location = SosLocationHelper.getCurrentLocation(this@HomeActivity)
+            val lat = location?.latitude ?: TripTrackingService.currentLat
+            val lng = location?.longitude ?: TripTrackingService.currentLng
             val address = SmsHelper.getAddress(lat, lng)
             val nickname = tokenManager.getNickname() ?: "사용자"
 
-            tokenManager.getContacts().forEach { (_, phone) ->
-                SmsHelper.sendSosAlert(
+            val recipientResults = mutableListOf<SosRecipientRequest>()
+
+            tokenManager.getContacts().forEach { (name, phone) ->
+                val (success, error) = SmsHelper.sendSosAlert(
                     this@HomeActivity, nickname, phone, lat, lng, address, recordingPath
                 )
+                recipientResults.add(
+                    SosRecipientRequest(name, phone, if (success) "SUCCESS" else "FAILED", error)
+                )
             }
+
+            try {
+                sosApi.createLog(
+                    SosCreateLogRequest(
+                        triggerType = "MANUAL",
+                        lat = lat,
+                        lng = lng,
+                        address = address,
+                        policeReported = tokenManager.isAutoPoliceReportEnabled(),
+                        recipients = recipientResults
+                    )
+                )
+            } catch (_: Exception) {}
         }
     }
 
@@ -307,7 +332,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun startVoiceDetection() {
-        startForegroundService(Intent(this, VoiceDetectionService::class.java))
+        if (tokenManager.isVoiceDetectionEnabled()) {
+            startForegroundService(Intent(this, VoiceDetectionService::class.java))
+        }
     }
 
     private fun applyNightMode() {

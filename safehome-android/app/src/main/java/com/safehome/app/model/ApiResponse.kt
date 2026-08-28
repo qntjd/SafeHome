@@ -117,3 +117,37 @@ data class DistrictCrimeResponse(
 data class AllDistrictCrimeResponse(
     val districts: List<DistrictCrimeResponse>
 )
+
+data class SosRecipientRequest(
+    val contactName: String?,
+    val phoneNumber: String,
+    val status: String,
+    val errorMessage: String?= null
+)
+
+data class SosCreateLogRequest(
+    val triggerType: String,
+    val lat: Double?,
+    val lng: Double?,
+    val address: String?,
+    val policeReported: Boolean,
+    val recipients: List<SosRecipientRequest>
+)
+
+data class SosRecipientResponse(
+    val contactName: String?,
+    val phoneNumber: String,
+    val status: String,
+    val errorMessage: String?
+)
+
+data class SosLogResponse(
+    val id: String,
+    val triggerType: String,
+    val lat: Double?,
+    val lng: Double?,
+    val address: String?,
+    val policeReported: Boolean,
+    val createdAt: String,
+    val recipients: List<SosRecipientResponse>
+)

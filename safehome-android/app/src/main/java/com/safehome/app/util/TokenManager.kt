@@ -74,4 +74,12 @@ class TokenManager(context: Context) {
     fun isAutoPoliceReportEnabled(): Boolean {
         return prefs.getBoolean("auto_police_report",false)
     }
+
+    fun saveVoiceDetectionEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("voice_detection_enabled", enabled).apply()
+    }
+
+    fun isVoiceDetectionEnabled(): Boolean {
+        return prefs.getBoolean("voice_detection_enabled", false)
+    }
 }
