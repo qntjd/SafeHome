@@ -6,6 +6,7 @@ import { safetyApi } from '@/api/safety'
 import { newsApi } from '@/api/news'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
 import Footer from '@/components/Footer'
+import Lighthouse from '@/components/Lighthouse'
 
 const GRADE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
   A: { color: 'var(--grade-a)', bg: 'var(--grade-a-bg)', label: '매우 안전' },
@@ -46,7 +47,7 @@ export default function DashboardPage() {
   })
 
   const districts = heatmap?.data?.data?.districts ?? []
-  const topDistricts = [...districts].sort((a, b) => b.totalScore - a.totalScore).slice(0, 3)
+  const topDistricts = [...districts].sort((a, b) => b.totalScore - a.totalScore).slice(0, 4)
   const cctvCount = facilityCounts?.data?.data?.cctvCount ?? 0
   const bellCount = facilityCounts?.data?.data?.bellCount ?? 0
   const recentNews = news?.data?.data?.articles ?? []
@@ -55,30 +56,49 @@ export default function DashboardPage() {
     ? Math.round(districts.reduce((s, d) => s + d.totalScore, 0) / districts.length)
     : null
 
-  return (
-    <div className="min-h-full pb-20 sm:pb-8" style={{ background: 'var(--bg-primary)' }}>
+  // General Statistics 참고 시안의 2x2 스탯 카드를 실제 데이터로 구성
+  const statCards = [
+    { label: '지역 평균 안전점수', value: avgScore ?? '--', icon: BarChart3, color: 'var(--accent-blue)' },
+    { label: '반경 500m CCTV', value: cctvCount, icon: Camera, color: 'var(--accent-blue)' },
+    { label: '반경 500m 비상벨', value: bellCount, icon: BellRing, color: 'var(--accent-amber-deep)' },
+    { label: '분석 지역 수', value: districts.length, icon: Map, color: 'var(--accent-purple)' },
+  ]
 
-      {/* 헤더 배너 */}
-      <div style={{ background: 'var(--ink)' }} className="px-4 sm:px-6 pt-7 pb-8 relative overflow-hidden">
-        <div
-          className="absolute rounded-full"
-          style={{ width: 260, height: 260, right: -80, top: -120, background: 'radial-gradient(circle, rgba(232,163,61,0.16) 0%, transparent 70%)' }}
-        />
-        <div className="max-w-4xl mx-auto relative">
-          <p className="text-sm mb-1.5 font-mono" style={{ color: 'var(--ink-text-muted)' }}>
-            {now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
-          </p>
-          <h1 className="font-display font-black text-2xl sm:text-3xl mb-1.5" style={{ color: 'var(--ink-text)' }}>
-            {greeting}, {nickname}님
-          </h1>
-          <p className="text-sm flex items-center gap-2" style={{ color: 'var(--ink-text-muted)' }}>
-            <span className="beacon-dot" />
-            오늘도 안전한 하루 되세요
-          </p>
-        </div>
+  return (
+    <div
+      className="min-h-full pb-20 sm:pb-8 relative overflow-hidden"
+      style={{ background: 'linear-gradient(165deg, #0a0e1f 0%, #04050c 75%)' }}
+    >
+      {/* 참고 시안의 지구본처럼, 등대를 우측 상단에 크게 배치 — 화면 전체를 균일하게
+          덮는 대신 오른쪽 한켠에 자리 잡고 카드들이 그 위/왼쪽으로 떠 있는 구도 */}
+      <div
+        className="absolute pointer-events-none"
+        style={{ right: '-8%', top: '-4%', width: 620, height: 620, opacity: 0.9 }}
+      >
+        <Lighthouse fill />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-5">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-7 relative">
+
+          {/* 인사말 — 헤더와 본문을 하나로 합쳐서, 등대 배경 위에 바로 놓임 */}
+          <div className="relative mb-5">
+            <div
+              className="absolute -inset-x-4 -inset-y-3 sm:-inset-x-6 pointer-events-none"
+              style={{ background: 'radial-gradient(120% 160% at 0% 0%, rgba(4,5,12,0.7) 0%, transparent 70%)' }}
+            />
+            <div className="relative">
+              <p className="text-sm mb-1.5 font-mono" style={{ color: 'var(--ink-text-muted)' }}>
+                {now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+              </p>
+              <h1 className="font-display font-black text-2xl sm:text-3xl mb-1.5" style={{ color: 'var(--ink-text)' }}>
+                {greeting}, {nickname}님
+              </h1>
+              <p className="text-sm flex items-center gap-2" style={{ color: 'var(--ink-text-muted)' }}>
+                <span className="beacon-dot" />
+                오늘도 안전한 하루 되세요
+              </p>
+            </div>
+          </div>
 
         {/* 안심 귀가 — 가장 중요한 단일 액션이라 맨 위, 가장 큰 형태로 배치 */}
         <Link
@@ -117,67 +137,50 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* 안전 현황 스트립 */}
-        <div
-          className="rounded-2xl mb-6 grid grid-cols-3 divide-x"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-        >
-          <div className="text-center py-3">
-            <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>지역 평균</p>
-            <p className="font-mono text-xl font-bold" style={{ color: 'var(--accent-blue)' }}>
-              {avgScore ?? '--'}
-            </p>
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>안전점수</p>
-          </div>
-          <div className="text-center py-3" style={{ borderColor: 'var(--border)' }}>
-            <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>반경 500m</p>
-            <p className="font-mono text-xl font-bold" style={{ color: 'var(--accent-blue)' }}>{cctvCount}</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>CCTV</p>
-          </div>
-          <div className="text-center py-3" style={{ borderColor: 'var(--border)' }}>
-            <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>반경 500m</p>
-            <p className="font-mono text-xl font-bold" style={{ color: 'var(--accent-blue)' }}>{bellCount}</p>
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>비상벨</p>
-          </div>
-        </div>
-
-        {/* 바로가기 — 아이콘 원형 칩 + 리스트형 로우 (파스텔 카드 그리드 지양) */}
-        <div
-          className="rounded-2xl mb-6 overflow-hidden"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-        >
-          {QUICK_LINKS.map(({ path, label, desc, icon: Icon, color }, i) => (
-            <Link
-              key={path}
-              to={path}
-              className="flex items-center gap-3 px-4 py-3.5 transition-colors"
-              style={{ borderTop: i > 0 ? '1px solid var(--border)' : undefined }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
+        {/* 종합 현황 — 참고 시안(스탯 카드 + 지역 리스트) 구조를 실제 데이터로 채운 섹션 */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {statCards.map(({ label, value, icon: Icon, color }) => (
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)' }}
+                key={label}
+                className="rounded-2xl p-3.5"
+                style={{
+                  background: 'color-mix(in srgb, var(--bg-card) 78%, transparent)',
+                  backdropFilter: 'blur(14px)',
+                  WebkitBackdropFilter: 'blur(14px)',
+                  border: '1px solid var(--border)',
+                }}
               >
-                <Icon size={18} color={color} strokeWidth={2} />
+                <div className="flex items-start justify-between mb-2">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)' }}
+                  >
+                    <Icon size={15} color={color} strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="font-mono text-lg font-bold leading-none mb-1" style={{ color }}>
+                  {value}
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{label}</p>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
-              </div>
-              <ChevronRight size={16} color="var(--text-muted)" className="shrink-0" />
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-
-          {/* 안전점수 TOP 3 */}
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          {/* 동네별 안심 지수 — 안전점수 상위 지역을 참고 시안의 리스트 구조로 표시 */}
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              background: 'color-mix(in srgb, var(--bg-card) 78%, transparent)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              border: '1px solid var(--border)',
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display font-bold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
                 <Camera size={15} color="var(--text-muted)" />
-                안전점수 TOP 3
+                동네별 안심 지수
               </h2>
               <Link to="/map" className="text-xs font-semibold" style={{ color: 'var(--accent-blue)' }}>
                 전체보기
@@ -224,49 +227,91 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+        </div>
 
-          {/* 최근 안전 뉴스 */}
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-bold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
-                <BellRing size={15} color="var(--text-muted)" />
-                최근 안전 뉴스
-              </h2>
-              <Link to="/news" className="text-xs font-semibold" style={{ color: 'var(--accent-blue)' }}>
-                전체보기
-              </Link>
-            </div>
-            <div className="flex flex-col gap-3">
-              {recentNews.length === 0 ? (
-                <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                  뉴스 없음
-                </p>
-              ) : (
-                recentNews.map((article) => (
-                  <a
-                    key={article.id}
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex gap-3 group"
-                  >
-                    <div
-                      className="w-1 rounded-full shrink-0 mt-1"
-                      style={{ background: 'var(--accent-amber)', minHeight: 36 }}
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium line-clamp-2 leading-relaxed group-hover:underline"
-                        style={{ color: 'var(--text-primary)' }}>
-                        {article.title}
-                      </p>
-                      <p className="text-xs mt-0.5 font-mono" style={{ color: 'var(--text-muted)' }}>
-                        {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
-                      </p>
-                    </div>
-                  </a>
-                ))
-              )}
-            </div>
+        {/* 바로가기 — 아이콘 원형 칩 + 리스트형 로우 (파스텔 카드 그리드 지양) */}
+        <div
+          className="rounded-2xl mb-6 overflow-hidden"
+          style={{
+            background: 'color-mix(in srgb, var(--bg-card) 78%, transparent)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          {QUICK_LINKS.map(({ path, label, desc, icon: Icon, color }, i) => (
+            <Link
+              key={path}
+              to={path}
+              className="flex items-center gap-3 px-4 py-3.5 transition-colors"
+              style={{ borderTop: i > 0 ? '1px solid var(--border)' : undefined }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: 'var(--bg-hover)', border: '1px solid var(--border)' }}
+              >
+                <Icon size={18} color={color} strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
+              </div>
+              <ChevronRight size={16} color="var(--text-muted)" className="shrink-0" />
+            </Link>
+          ))}
+        </div>
+
+        {/* 최근 안전 뉴스 */}
+        <div
+          className="rounded-2xl p-4 mb-6"
+          style={{
+            background: 'color-mix(in srgb, var(--bg-card) 78%, transparent)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-bold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
+              <BellRing size={15} color="var(--text-muted)" />
+              최근 안전 뉴스
+            </h2>
+            <Link to="/news" className="text-xs font-semibold" style={{ color: 'var(--accent-blue)' }}>
+              전체보기
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            {recentNews.length === 0 ? (
+              <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>
+                뉴스 없음
+              </p>
+            ) : (
+              recentNews.map((article) => (
+                <a
+                  key={article.id}
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex gap-3 group"
+                >
+                  <div
+                    className="w-1 rounded-full shrink-0 mt-1"
+                    style={{ background: 'var(--accent-amber)', minHeight: 36 }}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium line-clamp-2 leading-relaxed group-hover:underline"
+                      style={{ color: 'var(--text-primary)' }}>
+                      {article.title}
+                    </p>
+                    <p className="text-xs mt-0.5 font-mono" style={{ color: 'var(--text-muted)' }}>
+                      {new Date(article.publishedAt).toLocaleDateString('ko-KR')}
+                    </p>
+                  </div>
+                </a>
+              ))
+            )}
           </div>
         </div>
 

@@ -172,3 +172,94 @@ body {
     display: none;
   }
 }
+
+/* 진입 모션 — 요소가 순서대로 떠오르며 나타남 */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 비콘 신호 링 — 로그인 화면 등에서 마크가 실제로 신호를 보내는 것처럼 표현 */
+@keyframes beacon-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+.beacon-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--accent-amber);
+  animation: beacon-ring 3s ease-out infinite;
+  pointer-events: none;
+}
+.beacon-ring--delay {
+  animation-delay: 1.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+  }
+  .beacon-ring {
+    animation: none;
+    display: none;
+  }
+}
+
+/* 지도 핀 신호 링 — 로그인 일러스트의 안전 지도 핀에 사용 */
+@keyframes pin-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+.pin-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pin-ring 2.6s ease-out infinite;
+}
+.pin-ring--delay {
+  animation-delay: 1.3s;
+}
+
+/* 완만한 부유 모션 — 일러스트 배지가 살아있는 느낌을 주도록 */
+@keyframes float-y {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float-y 5.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-ring {
+    animation: none;
+    opacity: 0;
+  }
+  .animate-float {
+    animation: none;
+  }
+}
