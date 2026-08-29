@@ -20,7 +20,7 @@ public class SafetyScoreScheduler implements ApplicationRunner {
     private final SafetyScoreService safetyScoreService;
 
     private static final Map<String, String> ALL_DISTRICTS = new LinkedHashMap<>() {{
-        // 대구
+        
         put("2771010100", "대구 중구");
         put("2771010200", "대구 동구");
         put("2771010300", "대구 서구");
@@ -29,7 +29,7 @@ public class SafetyScoreScheduler implements ApplicationRunner {
         put("2771010600", "대구 수성구");
         put("2771010700", "대구 달서구");
         put("2771010800", "대구 달성군");
-        // 서울
+       //서울
         put("11", "서울");
         // 부산
         put("21", "부산");

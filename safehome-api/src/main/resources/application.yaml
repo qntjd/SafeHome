@@ -22,11 +22,9 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 3
-      # 커넥션이 오래 방치돼 있으면(네트워크 끊김 등) 강제로 재활용해서 풀이 영구히 막히지 않게 함
-      idle-timeout: 300000        # 5분 이상 idle이면 반납
-      max-lifetime: 1800000       # 30분 지나면 무조건 새 커넥션으로 교체
+      idle-timeout: 300000       
+      max-lifetime: 1800000       
       connection-timeout: 30000
-      # 60초 넘게 안 반납되는 커넥션이 있으면 어디서 가져갔는지 스택트레이스와 함께 경고 로그
       leak-detection-threshold: 60000
 
   jpa:
@@ -77,3 +75,8 @@ aligo:
   api-key: ${ALIGO_API_KEY:}
   user-id: ${ALIGO_USER_ID:}
   sender: ${ALIGO_SENDER:}
+
+claude:
+  api-key: ${CLAUDE_API_KEY}
+  api-url: https://api.anthropic.com/v1/messages
+  model: claude-haiku-4-5-20251001

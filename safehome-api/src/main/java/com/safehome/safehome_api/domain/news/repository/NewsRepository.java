@@ -5,11 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface NewsRepository extends JpaRepository<NewsArticle, UUID> {
 
     Page<NewsArticle> findAllByOrderByPublishedAtDesc(Pageable pageable);
+    
+    List<NewsArticle> findTop2ByOrderByPublishedAtDesc();
 
     Page<NewsArticle> findByKeywordContainingOrderByPublishedAtDesc(
             String keyword, Pageable pageable);
