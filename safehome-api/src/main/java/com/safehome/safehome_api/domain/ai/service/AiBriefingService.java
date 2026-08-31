@@ -23,29 +23,50 @@ public class AiBriefingService {
     private final NewsRepository newsRepository;
     private final ClaudeApiClient claudeApiClient;
 
-    @Transactional
+    // 트랜잭션 없음 
     public String getTodayBriefing(User user, String districtName, int safetyScore, String grade) {
         LocalDate today = LocalDate.now();
 
-        return briefingRepository.findByUserIdAndBriefingDate(user.getId(), today)
-                .map(AiBriefing::getContent)
-                .orElseGet(() -> generateAndSave(user, districtName, safetyScore, grade, today));
-    }
+        // 캐시 조회 
+        var cached = findCachedBriefing(user, today);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
 
-    private String generateAndSave(User user, String districtName, int safetyScore, String grade, LocalDate today) {
-        List<NewsArticle> recentNews = newsRepository.findTop2ByOrderByPublishedAtDesc();
+        // Claude API 호출 
+        List<NewsArticle> recentNews = findRecentNews();
         boolean isNight = LocalTime.now().getHour() >= 22 || LocalTime.now().getHour() < 6;
-
         String prompt = buildPrompt(districtName, safetyScore, grade, isNight, recentNews);
         String briefing = claudeApiClient.generate(prompt);
 
+        // DB 저장 
+        saveBriefing(user, today, briefing);
+
+        return briefing;
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<String> findCachedBriefing(User user, LocalDate today) {
+        return briefingRepository.findByUserIdAndBriefingDate(user.getId(), today)
+                .map(AiBriefing::getContent);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NewsArticle> findRecentNews() {
+        return newsRepository.findTop2ByOrderByPublishedAtDesc();
+    }
+
+    @Transactional
+    public void saveBriefing(User user, LocalDate today, String content) {
+        // 혹시 동시에 두 요청이 들어와도 안전하게, 중복 저장은 무시
+        if (briefingRepository.findByUserIdAndBriefingDate(user.getId(), today).isPresent()) {
+            return;
+        }
         briefingRepository.save(AiBriefing.builder()
                 .user(user)
                 .briefingDate(today)
-                .content(briefing)
+                .content(content)
                 .build());
-
-        return briefing;
     }
 
     private String buildPrompt(String districtName, int score, String grade, boolean isNight, List<NewsArticle> news) {
