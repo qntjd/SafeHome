@@ -7,6 +7,7 @@ import { newsApi } from '@/api/news'
 import { useCurrentLocation } from '@/hooks/useCurrentLocation'
 import Footer from '@/components/Footer'
 import Lighthouse from '@/components/Lighthouse'
+import { aiApi } from '@/api/ai'
 
 const GRADE_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
   A: { color: 'var(--grade-a)', bg: 'var(--grade-a-bg)', label: '매우 안전' },
@@ -56,7 +57,20 @@ export default function DashboardPage() {
     ? Math.round(districts.reduce((s, d) => s + d.totalScore, 0) / districts.length)
     : null
 
-  // General Statistics 참고 시안의 2x2 스탯 카드를 실제 데이터로 구성
+  const topDistrict = topDistricts[0]
+
+  const { data: briefing } = useQuery({
+    queryKey: ['ai-briefing', topDistrict?.districtCode],
+    queryFn: () => aiApi.getBriefing(
+      topDistrict!.districtCode,
+      topDistrict!.districtName,
+      Math.round(topDistrict!.totalScore),
+      topDistrict!.grade
+    ),
+    enabled: !!topDistrict,
+    staleTime: 1000 * 60 * 60, // 1시간
+  })
+  
   const statCards = [
     { label: '지역 평균 안전점수', value: avgScore ?? '--', icon: BarChart3, color: 'var(--accent-blue)' },
     { label: '반경 500m CCTV', value: cctvCount, icon: Camera, color: 'var(--accent-blue)' },
@@ -69,11 +83,9 @@ export default function DashboardPage() {
       className="min-h-full pb-20 sm:pb-8 relative overflow-hidden"
       style={{ background: 'linear-gradient(165deg, #0a0e1f 0%, #04050c 75%)' }}
     >
-      {/* 참고 시안의 지구본처럼, 등대를 우측 상단에 크게 배치 — 화면 전체를 균일하게
-          덮는 대신 오른쪽 한켠에 자리 잡고 카드들이 그 위/왼쪽으로 떠 있는 구도.
-          모바일에서는 작게, 데스크톱으로 갈수록 크게 반응형 사이징 */}
+      {/* 배경 등대 사이즈 */}
       <div
-        className="absolute pointer-events-none w-[320px] h-[320px] sm:w-[440px] sm:h-[440px] lg:w-[560px] lg:h-[560px] xl:w-[640px] xl:h-[640px]"
+        className="absolute pointer-events-none w-[360px] h-[360px] sm:w-[500px] sm:h-[500px] lg:w-[640px] lg:h-[640px] xl:w-[740px] xl:h-[740px]"
         style={{ right: '-8%', top: '-4%', opacity: 0.9 }}
       >
         <Lighthouse fill />
@@ -81,7 +93,7 @@ export default function DashboardPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-7 relative lg:mx-0 lg:ml-10 xl:ml-16 2xl:ml-24">
 
-          {/* 인사말 — 헤더와 본문을 하나로 합쳐서, 등대 배경 위에 바로 놓임 */}
+          {/* 인사말 */}
           <div className="relative mb-5">
             <div
               className="absolute -inset-x-4 -inset-y-3 sm:-inset-x-6 pointer-events-none"
@@ -100,8 +112,26 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+        {briefing?.data?.data && (
+          <div
+            className="relative z-10 rounded-2xl p-4 mb-4"
+            style={{
+              background: 'color-mix(in srgb, var(--bg-card) 78%, transparent)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <p className="text-xs mb-2 font-semibold flex items-center gap-1.5" style={{ color: 'var(--accent-blue)' }}>
+              ✨ AI 안전 브리핑
+            </p>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+              {briefing.data.data}
+            </p>
+          </div>
+        )}  
 
-        {/* 안심 귀가 — 가장 중요한 단일 액션이라 맨 위, 가장 큰 형태로 배치 */}
+        {/* 안심 귀가  */}
         <Link
           to="/trip"
           className="relative z-10 flex items-center justify-between gap-4 p-5 mb-4 transition-transform"
@@ -138,7 +168,7 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* 종합 현황 — 참고 시안(스탯 카드 + 지역 리스트) 구조를 실제 데이터로 채운 섹션 */}
+        {/* 종합 현황 */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {statCards.map(({ label, value, icon: Icon, color }) => (
@@ -168,7 +198,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* 동네별 안심 지수 — 안전점수 상위 지역을 참고 시안의 리스트 구조로 표시 */}
+          {/* 동네별 안심 지수 */}
           <div
             className="rounded-2xl p-4"
             style={{
@@ -230,7 +260,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 바로가기 — 아이콘 원형 칩 + 리스트형 로우 (파스텔 카드 그리드 지양) */}
+        {/* 바로가기 */}
         <div
           className="rounded-2xl mb-6 overflow-hidden"
           style={{

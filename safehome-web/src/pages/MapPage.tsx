@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import { MapPin } from 'lucide-react'
@@ -23,11 +23,18 @@ const GRADE_CONFIG: Record<string, { color: string; bg: string }> = {
 
 export default function MapPage() {
   const { position } = useCurrentLocation()
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
   const [selectedFacility, setSelectedFacility] = useState<FacilityResponse | null>(null)
-  const [activeTypes, setActiveTypes]           = useState<Set<string>>(
+  const [activeTypes, setActiveTypes] = useState<Set<string>>(
     new Set(['CCTV', 'EMERGENCY_BELL', 'POLICE'])
   )
-  const [myDistrictName, setMyDistrictName]     = useState<string | null>(null)
+  const [myDistrictName, setMyDistrictName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (position && !mapCenter) {
+      setMapCenter(position)
+    }
+  }, [position, mapCenter])
 
   // 현재 위치 → 역지오코딩으로 시도명 추출
   useEffect(() => {
@@ -52,9 +59,9 @@ export default function MapPage() {
   }, [position])
 
   const { data: facilities } = useQuery({
-    queryKey: ['facilities', position],
-    queryFn:  () => safetyApi.getFacilities(position.lat, position.lng, 3000),
-    enabled:  !!position,
+    queryKey: ['facilities', mapCenter],
+    queryFn:  () => safetyApi.getFacilities(mapCenter!.lat, mapCenter!.lng, 3000),
+    enabled:  !!mapCenter,
   })
 
   // 지도 마커는 트래픽 최적화를 위해 최대 300개로 제한되므로,
@@ -81,6 +88,12 @@ export default function MapPage() {
     })
   }
 
+  // 지도 이동/줌이 끝나면 중심 좌표 갱신 → 새 지역 마커 로드
+  const handleMapChange = useCallback((map: kakao.maps.Map) => {
+    const center = map.getCenter()
+    setMapCenter({ lat: center.getLat(), lng: center.getLng() })
+  }, [])
+
   // 내 동네 매칭
   const myDistrict = myDistrictName
     ? districts.find(d =>
@@ -100,6 +113,8 @@ export default function MapPage() {
           center={position}
           style={{ width: '100%', height: '100%' }}
           level={5}
+          onDragEnd={handleMapChange}
+          onZoomChanged={handleMapChange}
         >
           <MapMarker position={position} />
           {facilityList.map((f, i) => (
@@ -175,7 +190,6 @@ export default function MapPage() {
         className="w-full flex-1 min-h-0 sm:w-72 sm:flex-none sm:shrink-0 flex flex-col"
         style={{ background: 'var(--bg-secondary)', borderLeft: '1px solid var(--border)' }}
       >
-        {/* 헤더 */}
         <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <h1 className="font-display font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
             안전점수
@@ -183,8 +197,6 @@ export default function MapPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-
-          {/* 내 동네 카드 */}
           {myDistrict && (() => {
             const gc = GRADE_CONFIG[myDistrict.grade] ?? GRADE_CONFIG.F
             return (
@@ -229,7 +241,6 @@ export default function MapPage() {
             )
           })()}
 
-          {/* 전체 지역 목록 */}
           <div className="p-3 flex flex-col gap-2">
             {districts.length === 0 ? (
               <div className="flex flex-col gap-2 mt-2">
@@ -280,7 +291,6 @@ export default function MapPage() {
           </div>
         </div>
 
-        {/* 범례 — 하단 SOS/음성감지 플로팅 버튼에 안 가리게 여유 확보 */}
         <div className="p-4 pb-28" style={{ borderTop: '1px solid var(--border)' }}>
           <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>시설 종류</p>
           <div className="flex flex-col gap-2">
