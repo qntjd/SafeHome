@@ -31,27 +31,7 @@ class SplashActivity : AppCompatActivity() {
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 )
-
-        startSplashSequence()
-    }
-
-    private fun startSplashSequence() {
-        val dotGrid = binding.dotGridView
-        val SPEED = 850L
-        val WAVE = 550L
-
-        // 1차 파동
-        dotGrid.playRipple(100L) {
-            // 2차 파동
-            dotGrid.playRipple(200L) {
-                // 중앙으로 모임
-                dotGrid.fadeOutAll(100L) {
-                    runOnUiThread {
-                        showCircleAndLogo()
-                    }
-                }
-            }
-        }
+        showCircleAndLogo()
     }
 
     private fun showCircleAndLogo() {
