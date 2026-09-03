@@ -14,7 +14,10 @@ public class AppConfig {
     @Bean
     @Primary
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));
+        factory.setReadTimeout(Duration.ofSeconds(10));
+        return new RestTemplate(factory);
     }
 
     

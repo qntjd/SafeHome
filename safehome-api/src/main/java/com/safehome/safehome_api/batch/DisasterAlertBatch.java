@@ -3,7 +3,6 @@ package com.safehome.safehome_api.batch;
 import com.safehome.safehome_api.domain.alert.entity.DisasterAlert;
 import com.safehome.safehome_api.domain.alert.repository.AlertSubscriptionRepository;
 import com.safehome.safehome_api.domain.alert.repository.DisasterAlertRepository;
-import com.safehome.safehome_api.domain.alert.service.AlertService;
 import com.safehome.safehome_api.domain.alert.service.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +29,8 @@ public class DisasterAlertBatch {
     @Value("${public-api.disaster.key:YOUR_API_KEY}")
     private String apiKey;
 
-    // 3분마다 재난문자 API 폴링
-    @Scheduled(fixedDelay = 180_000)
+    // 5분마다 재난문자 API 폴링
+    @Scheduled(fixedDelay = 300_000)
     public void fetchAndBroadcast() {
         log.info("[DisasterBatch] 재난문자 수집 시작. SSE 연결 수={}", sseEmitterManager.getConnectionCount());
 
