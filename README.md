@@ -183,7 +183,7 @@ SafeHome은 경찰청·행정안전부 등 공공데이터를 기반으로 1인 
 | Naver Search API | 뉴스 수집 |
 | Google OAuth2 | 소셜 로그인 |
 
-### 왜 이 기술을 선택했는가
+### 기술 선택 이유
 
 - **PostgreSQL**: 위치 기반 반경 검색이 핵심 기능이라 위경도 컬럼에 대한 인덱스·범위 쿼리 최적화가 중요했고, JSON 타입과 지리 데이터 확장 가능성을 함께 고려해 선택. 이후 Bounding Box 사전 필터링 최적화의 기반이 됨.
 - **Redis (Cache-Aside)**: 안전지도 조회처럼 읽기 비중이 압도적으로 높은 API의 응답 속도를 낮추기 위해 도입. `@Cacheable` 대신 `RedisTemplate` + `ObjectMapper`로 직접 캐시 로직을 짜서 캐시 무효화 시점과 직렬화 방식을 명시적으로 제어.
