@@ -34,7 +34,7 @@ public class SafetyService {
 
     private static final String OSRM_FOOT_ROUTE_URL = "https://router.project-osrm.org/route/v1/foot/";
 
-    // 반경(미터) 기준으로 좌표 검색을 수행하는 공통 헬퍼
+    // 반경(미터) 기준으로 좌표 검색을 수행
     private List<SafetyFacility> findWithinRadius(double lat, double lng, double radiusMeters) {
         double latDelta = radiusMeters / 111000.0;
         double lngDelta = radiusMeters / (111000.0 * Math.cos(Math.toRadians(lat)));
@@ -82,7 +82,14 @@ public class SafetyService {
             } catch (Exception ignored) {}
         }
 
-        List<SafetyDto.FacilityResponse> response = findWithinRadius(lat, lng, radius)
+        double latDelta = radius / 111000.0;
+        double lngDelta = radius / (111000.0 * Math.cos(Math.toRadians(lat)));
+
+        List<SafetyDto.FacilityResponse> response = facilityRepository.findWithinRadiusIncludingInactive(
+                    lat, lng, radius,
+                    lat - latDelta, lat + latDelta,
+                    lng - lngDelta, lng + lngDelta
+                )
                 .stream()
                 .map(SafetyDto.FacilityResponse::from)
                 .toList();
@@ -115,9 +122,7 @@ public class SafetyService {
         );
     }
 
-    // 최단 경로 vs 안전 경로(안전시설이 밀집한 지점을 경유하는 경로) 비교.
-    // 실제 보행로를 따라가는 경로는 OSRM(무료 공개 도보 길찾기)에서 받아오고,
-    // OSRM이 응답하지 않으면 직선 근사로 자연스럽게 대체된다.
+    
     @Transactional(readOnly = true)
     public SafetyDto.RouteCompareResponse getRouteCompare(
             double startLat, double startLng,
@@ -142,9 +147,7 @@ public class SafetyService {
                 directEval.safetyScore(), 0.0
         );
 
-        // 출발~도착 중간 지점 주변에서 경유지 후보(실제 안전시설 위치)를 찾는다.
-        // 후보 하나하나마다 DB를 다시 조회하면 최악의 경우 수백 번 왕복이 생겨 타임아웃이 나므로,
-        // 코리도 전체를 한 번만 조회한 뒤 밀도 계산은 메모리 안에서 처리한다.
+        
         double midLat = (startLat + endLat) / 2;
         double midLng = (startLng + endLng) / 2;
         double corridorRadius = Math.max(directDistance / 2 * 1.3, 300);

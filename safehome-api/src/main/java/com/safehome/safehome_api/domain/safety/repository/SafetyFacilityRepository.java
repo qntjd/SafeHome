@@ -13,23 +13,22 @@ public interface SafetyFacilityRepository extends JpaRepository<SafetyFacility, 
 
     // 지도 마커용 — 가까운 순 최대 300개
     @Query(value = """
-        SELECT * FROM safety_facilities f
-        WHERE f.is_active = true
-          AND f.lat BETWEEN :minLat AND :maxLat
-          AND f.lng BETWEEN :minLng AND :maxLng
-          AND (6371000 * acos(
-                cos(radians(:lat)) * cos(radians(f.lat)) *
-                cos(radians(f.lng) - radians(:lng)) +
-                sin(radians(:lat)) * sin(radians(f.lat))
-              )) <= :radiusMeters
-        ORDER BY (6371000 * acos(
-                cos(radians(:lat)) * cos(radians(f.lat)) *
-                cos(radians(f.lng) - radians(:lng)) +
-                sin(radians(:lat)) * sin(radians(f.lat))
-              ))
-        LIMIT 300
-        """, nativeQuery = true)
-    List<SafetyFacility> findWithinRadius(
+    SELECT * FROM safety_facilities f
+    WHERE f.lat BETWEEN :minLat AND :maxLat
+      AND f.lng BETWEEN :minLng AND :maxLng
+      AND (6371000 * acos(
+            cos(radians(:lat)) * cos(radians(f.lat)) *
+            cos(radians(f.lng) - radians(:lng)) +
+            sin(radians(:lat)) * sin(radians(f.lat))
+          )) <= :radiusMeters
+    ORDER BY (6371000 * acos(
+            cos(radians(:lat)) * cos(radians(f.lat)) *
+            cos(radians(f.lng) - radians(:lng)) +
+            sin(radians(:lat)) * sin(radians(f.lat))
+          ))
+    LIMIT 300
+    """, nativeQuery = true)
+    List<SafetyFacility> findWithinRadiusIncludingInactive(
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radiusMeters") double radiusMeters,

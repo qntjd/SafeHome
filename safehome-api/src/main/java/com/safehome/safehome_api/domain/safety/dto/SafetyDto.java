@@ -53,14 +53,16 @@ public class SafetyDto {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record FacilityResponse(
+            String id,
             String type,
             Double lat,
             Double lng,
-            String districtName
+            String districtName,
+            Boolean isActive
     ) implements Serializable {
         public static FacilityResponse from(SafetyFacility f) {
             return new FacilityResponse(
-                    f.getType().name(), f.getLat(), f.getLng(), f.getDistrictName());
+                    f.getId().toString(), f.getType().name(), f.getLat(), f.getLng(), f.getDistrictName(), f.getIsActive());
         }
     }
 
