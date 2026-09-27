@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: local
+  jackson:
+    timezone: Asia/Seoul
 
   mail:
     host: smtp.gmail.com

@@ -10,6 +10,7 @@ import com.google.android.gms.location.LocationServices
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
+import com.kakao.vectormap.label.Label
 import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelStyles
 import com.kakao.vectormap.label.LabelOptions
@@ -40,7 +41,29 @@ class MapActivity :  AppCompatActivity() {
     private var allFacilites = listOf<FacilityResponse>()
     private var currentFilter = "ALL"
 
+
     private val iconCache = mutableMapOf<String, android.graphics.Bitmap>()
+
+
+    private val MARKER_DRAWABLES: Map<Pair<String, MarkerState>, Int> = mapOf(
+        ("CCTV" to MarkerState.DEFAULT) to com.safehome.app.R.drawable.ic_marker_cctv_default,
+        ("CCTV" to MarkerState.SELECTED) to com.safehome.app.R.drawable.ic_marker_cctv_selected,
+        ("CCTV" to MarkerState.INACTIVE) to com.safehome.app.R.drawable.ic_marker_cctv_inactive,
+        ("EMERGENCY_BELL" to MarkerState.DEFAULT) to com.safehome.app.R.drawable.ic_marker_emergency_bell_default,
+        ("EMERGENCY_BELL" to MarkerState.SELECTED) to com.safehome.app.R.drawable.ic_marker_emergency_bell_selected,
+        ("EMERGENCY_BELL" to MarkerState.INACTIVE) to com.safehome.app.R.drawable.ic_marker_emergency_bell_inactive,
+        ("POLICE" to MarkerState.DEFAULT) to com.safehome.app.R.drawable.ic_marker_police_default,
+        ("POLICE" to MarkerState.SELECTED) to com.safehome.app.R.drawable.ic_marker_police_selected,
+        ("POLICE" to MarkerState.INACTIVE) to com.safehome.app.R.drawable.ic_marker_police_inactive
+    )
+
+
+    private val facilityIdByLabel = mutableMapOf<Label, String>()
+    private val labelByFacilityId = mutableMapOf<String, Label>()
+    private val facilityById = mutableMapOf<String, FacilityResponse>()
+    private var selectedFacilityId: String? = null
+
+    private enum class MarkerState { DEFAULT, SELECTED, INACTIVE }
 
     override fun onCreate(saveInstanceState: Bundle?) {
         super.onCreate(saveInstanceState)
@@ -123,6 +146,12 @@ class MapActivity :  AppCompatActivity() {
             override fun onMapReady(map: KakaoMap) {
                 kakaoMap = map
                 isMapReady = true
+
+
+                map.setOnLabelClickListener { _, _, label ->
+                    facilityIdByLabel[label]?.let { onFacilityMarkerClicked(it) }
+                }
+
                 loadFacilities()
 
                 map.setOnCameraMoveEndListener { _, position, _ ->
@@ -185,85 +214,94 @@ class MapActivity :  AppCompatActivity() {
         val labelManager = map.labelManager ?: return
 
         labelManager.clearAll()
+        facilityIdByLabel.clear()
+        labelByFacilityId.clear()
+        facilityById.clear()
+
 
         val filtered = if (currentFilter == "ALL") allFacilites
-                        else allFacilites.filter { it.type == currentFilter }
+        else allFacilites.filter { it.type == currentFilter }
 
         filtered.forEach { facility ->
-            val color = when (facility.type) {
-                "CCTV" -> "#4F7EF8"
-                "EMERGENCY_BELL" -> "#F87171"
-                "POLICE" -> "#A78BFA"
-                else -> "#888888"
-            }
+            val state = markerStateFor(facility)
 
             val styles = labelManager.addLabelStyles(
-                LabelStyles.from(
-                    LabelStyle.from(getFacilityIcon(facility.type))
-                )
+                LabelStyles.from(LabelStyle.from(getFacilityIcon(facility.type, state)))
             )
 
-            labelManager.layer?.addLabel(
+            val label = labelManager.layer?.addLabel(
                 LabelOptions.from(LatLng.from(facility.lat, facility.lng))
                     .setStyles(styles)
             )
-        }
-    }
 
-    private fun getFacilityIcon(type: String): android.graphics.Bitmap {
-        return iconCache.getOrPut(type) {
-            when (type) {
-                "CCTV" -> createBadgedIcon(
-                    resId = com.safehome.app.R.drawable.ic_cctv,
-                    bgColor = android.graphics.Color.parseColor("#4F7EF8")
-                )
-                "EMERGENCY_BELL" -> loadPlainIcon(com.safehome.app.R.drawable.ic_bell)
-                "POLICE" -> loadPlainIcon(com.safehome.app.R.drawable.ic_police)
-                else -> loadPlainIcon(com.safehome.app.R.drawable.ic_cctv)
+            if (label != null) {
+                facilityIdByLabel[label] = facility.id
+                labelByFacilityId[facility.id] = label
+                facilityById[facility.id] = facility
             }
         }
     }
 
-    // CCTV용: 원형 배경 + 흰 아이콘
-    private fun createBadgedIcon(resId: Int, bgColor: Int): android.graphics.Bitmap {
-        val size = 72
-        val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(bitmap)
-
-        // 원형 배경
-        val paint = android.graphics.Paint().apply {
-            color = bgColor
-            isAntiAlias = true
-        }
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
-
-        // 흰 테두리
-        val strokePaint = android.graphics.Paint().apply {
-            color = android.graphics.Color.WHITE
-            style = android.graphics.Paint.Style.STROKE
-            strokeWidth = 4f
-            isAntiAlias = true
-        }
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f - 2f, strokePaint)
-
-        // 아이콘
-        val drawable = androidx.core.content.ContextCompat.getDrawable(this, resId)!!
-        val iconSize = (size * 0.6).toInt()
-        val offset = (size - iconSize) / 2
-        drawable.setBounds(offset, offset, offset + iconSize, offset + iconSize)
-        drawable.setTint(android.graphics.Color.WHITE)
-        drawable.draw(canvas)
-
-        return bitmap
+    private fun markerStateFor(facility: FacilityResponse): MarkerState = when {
+        facility.isActive == false -> MarkerState.INACTIVE
+        facility.id == selectedFacilityId -> MarkerState.SELECTED
+        else -> MarkerState.DEFAULT
     }
 
-    // 비상벨/경찰서용:(배경 없이 아이콘만)
-    private fun loadPlainIcon(resId: Int): android.graphics.Bitmap {
+    private fun onFacilityMarkerClicked(facilityId: String) {
+        val facility = facilityById[facilityId] ?: return
+
+
+        if (facility.isActive == false) return
+
+        val labelManager = kakaoMap?.labelManager ?: return
+        val previousSelected = selectedFacilityId
+        selectedFacilityId = if (previousSelected == facilityId) null else facilityId
+
+
+        if (previousSelected != null && previousSelected != facilityId) {
+            facilityById[previousSelected]?.let { prevFacility ->
+                labelByFacilityId[previousSelected]?.changeStyles(
+                    labelManager.addLabelStyles(
+                        LabelStyles.from(
+                            LabelStyle.from(getFacilityIcon(prevFacility.type, markerStateFor(prevFacility)))
+                        )
+                    )
+                )
+            }
+        }
+
+
+        labelByFacilityId[facilityId]?.changeStyles(
+            labelManager.addLabelStyles(
+                LabelStyles.from(
+                    LabelStyle.from(getFacilityIcon(facility.type, markerStateFor(facility)))
+                )
+            )
+        )
+
+        // TODO: 여기서 하단 시설 정보 카드(주소, 타입 등)를 띄우는 로직 연결
+    }
+
+    private fun getFacilityIcon(type: String, state: MarkerState): android.graphics.Bitmap {
+        val key = "$type|$state"
+        return iconCache.getOrPut(key) {
+            val resId = MARKER_DRAWABLES[type to state]
+                ?: MARKER_DRAWABLES["CCTV" to MarkerState.DEFAULT]!!
+            drawableToBitmap(resId)
+        }
+    }
+
+
+    private fun drawableToBitmap(resId: Int): android.graphics.Bitmap {
         val drawable = androidx.core.content.ContextCompat.getDrawable(this, resId)!!
-        val size = 64
-        val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+        (drawable as? android.graphics.drawable.BitmapDrawable)?.let { return it.bitmap }
+
+        val bitmap = android.graphics.Bitmap.createBitmap(
+            drawable.intrinsicWidth, drawable.intrinsicHeight, android.graphics.Bitmap.Config.ARGB_8888
+        )
         val canvas = android.graphics.Canvas(bitmap)
-        drawable.setBounds(0, 0, size, size)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
         return bitmap
     }

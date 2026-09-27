@@ -53,7 +53,8 @@ data class FacilityResponse(
     val lat: Double,
     val lng: Double,
     val name: String?,
-    val districtName: String?
+    val districtName: String?,
+    val isActive: Boolean? = null
 )
 
 data class FacilityCountResponse(
