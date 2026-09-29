@@ -76,7 +76,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://192.168.*.*:5173",
                 "http://10.*.*.*:5173",
-                "https://safehome-api.duckdns.org"
+                "https://safehome-api.duckdns.org",
+                "https://www.safetyhome.app"
 
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

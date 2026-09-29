@@ -14,11 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-/**
- * 알리고(Aligo) SMS 발송 클라이언트.
- * https://smartsms.aligo.in — 가입 후 API Key 발급 + 발신번호 사전 등록이 필요하다.
- * 키가 설정돼 있지 않으면(로컬 개발 등) 실제 전송 없이 로그만 남기고 조용히 건너뛴다.
- */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor

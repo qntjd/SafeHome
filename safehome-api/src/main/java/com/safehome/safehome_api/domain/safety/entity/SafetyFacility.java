@@ -37,6 +37,8 @@ public class SafetyFacility {
 
     private String districtName;
 
+    private String address;
+
     @Builder.Default
     private Boolean isActive = true;
 

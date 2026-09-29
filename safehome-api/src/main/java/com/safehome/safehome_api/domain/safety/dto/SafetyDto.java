@@ -25,17 +25,17 @@ public class SafetyDto {
             String districtName
     ) {}
 
-    // 최단 경로 vs 안전 경로(안전시설 밀집 경유지를 도는 경로) 비교
+    // 최단 경로 vs 안전 경로
     public record RouteOption(
-            String type,               // "DIRECT" | "SAFE"
-            String label,              // "최단 경로" | "안전 경로"
-            List<RoutePoint> path,     // 경로를 그리는 좌표(2~3개 — 출발/경유/도착)
+            String type,              
+            String label,              
+            List<RoutePoint> path,    
             List<RoutePoint> safePoints,
             int totalCctv,
             int totalBell,
             int totalPolice,
             double safetyScore,
-            double extraDistanceRatio  // 최단 경로 대비 추가로 더 걷는 비율(0.15 = 15% 더 걸음)
+            double extraDistanceRatio  
     ) {}
 
     public record RouteCompareResponse(
@@ -57,12 +57,13 @@ public class SafetyDto {
             String type,
             Double lat,
             Double lng,
+            String address,
             String districtName,
             Boolean isActive
     ) implements Serializable {
         public static FacilityResponse from(SafetyFacility f) {
             return new FacilityResponse(
-                    f.getId().toString(), f.getType().name(), f.getLat(), f.getLng(), f.getDistrictName(), f.getIsActive());
+                    f.getId().toString(), f.getType().name(), f.getLat(), f.getLng(), f.getAddress(), f.getDistrictName(), f.getIsActive());
         }
     }
 
@@ -75,7 +76,7 @@ public class SafetyDto {
             Double lightScore,
             Double bellScore,
             Double totalScore,
-            String grade,           // A/B/C/D/F 등급
+            String grade,         
             LocalDateTime calculatedAt
     ) implements Serializable {
         public static ScoreResponse from(DistrictScore d) {
@@ -104,7 +105,7 @@ public class SafetyDto {
     public record NearbyFacilitiesRequest(
             Double lat,
             Double lng,
-            Double radiusMeters   // 기본 500m
+            Double radiusMeters   
     ) implements Serializable {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)

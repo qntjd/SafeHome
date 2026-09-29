@@ -17,8 +17,8 @@ spring:
             enable: true
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:safehome}
-    username: ${DB_USERNAME:safehome}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -40,8 +40,8 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
   security:
     oauth2:
@@ -71,12 +71,12 @@ public-api:
     url: https://www.safetydata.go.kr/V2/api/DSSP-IF-00247
     key: ${DISASTER_API_KEY:YOUR_API_KEY}
 app:
-  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  frontend-url: ${FRONTEND_URL}
 
 aligo:
-  api-key: ${ALIGO_API_KEY:}
-  user-id: ${ALIGO_USER_ID:}
-  sender: ${ALIGO_SENDER:}
+  api-key: ${ALIGO_API_KEY}
+  user-id: ${ALIGO_USER_ID}
+  sender: ${ALIGO_SENDER}
 
 claude:
   api-key: ${CLAUDE_API_KEY}
