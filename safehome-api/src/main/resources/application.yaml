@@ -55,9 +55,6 @@ spring:
               - profile
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
 
-server:
-  forward-headers-strategy: framework
-
 jwt:
   secret: ${JWT_SECRET}
   access-expiration: 604800000
@@ -77,12 +74,14 @@ app:
   frontend-url: ${FRONTEND_URL}
 
 aligo:
-  api-key: ${ALIGO_API_KEY}
-  user-id: ${ALIGO_USER_ID}
-  sender: ${ALIGO_SENDER}
+  api-key: ${ALIGO_API_KEY:}
+  user-id: ${ALIGO_USER_ID:}
+  sender: ${ALIGO_SENDER:}
 
 claude:
   api-key: ${CLAUDE_API_KEY}
   api-url: https://api.anthropic.com/v1/messages
   model: claude-haiku-4-5-20251001
 
+server:
+  forward-headers-strategy: framework
