@@ -37,7 +37,7 @@ public class AligoSmsClient {
         return StringUtils.hasText(apiKey) && StringUtils.hasText(userId) && StringUtils.hasText(sender);
     }
 
-    /** @param receiverPhone 숫자만 남기고 자동 정리됨 (010-1234-5678 형태로 넘겨도 됨) */
+    
     @SuppressWarnings("unchecked")
     public void send(String receiverPhone, String message) {
         if (!isConfigured()) {
