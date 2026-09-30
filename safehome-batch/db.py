@@ -7,7 +7,7 @@ from config import DB_CONFIG
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
-KAKAO_REST_API_KEY = os.getenv["KAKAO_REST_API_KEY"]
+KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 KAKAO_COORD2ADDRESS_URL = "https://dapi.kakao.com/v2/local/geo/coord2address.json"
 
 def get_address_from_coords(lat: float, lng: float) -> str | None:
