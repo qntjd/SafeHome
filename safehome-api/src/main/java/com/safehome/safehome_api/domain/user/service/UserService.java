@@ -25,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final EmailVerificationService emailVerificationService;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -33,6 +34,10 @@ public class UserService {
     public AuthDto.TokenResponse register(AuthDto.RegisterRequest req) {
         if (userRepository.existsByEmail(req.email())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (!emailVerificationService.consumeVerified(req.email())) {
+            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
         }
 
         User user = User.builder()
