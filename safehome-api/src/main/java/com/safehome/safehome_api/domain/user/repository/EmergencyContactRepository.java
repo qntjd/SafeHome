@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface EmergencyContactRepository extends JpaRepository<EmergencyContact, UUID> {
     List<EmergencyContact> findAllByUserId(UUID userId);
+
+    long countByUserId(UUID userId);
+    boolean existsByUserIdAndPhone(UUID userId, String phone);
 }

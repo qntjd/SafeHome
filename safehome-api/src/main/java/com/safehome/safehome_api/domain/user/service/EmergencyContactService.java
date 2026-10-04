@@ -34,10 +34,12 @@ public class EmergencyContactService {
                                                            EmergencyContactDto.CreateRequest req) {
         User user = findUser(email);
 
-        // 최대 5명 제한
-        long count = contactRepository.findAllByUserId(user.getId()).size();
-        if (count >= 5) {
-            throw new IllegalStateException("비상연락처는 최대 5명까지 등록할 수 있습니다.");
+        if (contactRepository.countByUserId(user.getId()) >= 5) {
+            throw new IllegalArgumentException("연락처는 최대 5개까지 등록 가능합니다.");
+        }
+
+        if (contactRepository.existsByUserIdAndPhone(user.getId(), req.phone())) {
+            throw new IllegalArgumentException("이미 등록된 연락처입니다.");
         }
 
         EmergencyContact contact = EmergencyContact.builder()
