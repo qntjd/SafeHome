@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private const val BASE_URL = "https://safehome-api.duckdns.org/api/"
+    private const val BASE_URL = "https://www.safetyhome.app/api/"
     private lateinit var tokenManager: TokenManager
     private lateinit var retrofit: Retrofit
 

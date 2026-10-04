@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="14dp" />
+            <solid android:color="@color/sh_disabled" />
+        </shape>
+    </item>
+    <item>
+        <ripple android:color="#330E1526">
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="14dp" />
+                    <gradient android:angle="0"
+                        android:startColor="@color/sh_amber_light"
+                        android:endColor="@color/sh_amber" />
+                </shape>
+            </item>
+        </ripple>
+    </item>
+</selector>

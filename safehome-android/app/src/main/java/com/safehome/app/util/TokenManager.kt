@@ -2,8 +2,11 @@ package com.safehome.app.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.safehome.app.model.ContactResponse
 
 class TokenManager(context: Context) {
+
+    private val gson = com.google.gson.Gson()
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences("safehome_prefs", Context.MODE_PRIVATE)
@@ -37,18 +40,32 @@ class TokenManager(context: Context) {
         prefs.edit().clear().apply()
     }
 
-    fun saveContacts(contacts: List<Pair<String, String>>) {
-        val json = contacts.joinToString("|") { "${it.first},${it.second}" }
-        prefs.edit().putString("emergency_contacts", json).apply()
+    fun saveContactCache(contacts: List<ContactResponse>) {
+        prefs.edit().putString("contact_cache", gson.toJson(contacts)).apply()
     }
 
-    fun getContacts(): List<Pair<String, String>> {
-        val json = prefs.getString("emergency_contacts", "") ?: return emptyList()
-        if (json.isEmpty()) return emptyList()
-        return json.split("|").mapNotNull {
+    fun getContactCache(): List<ContactResponse> {
+        val json = prefs.getString("contact_cache", null) ?: return emptyList()
+        return try {
+            val type = object : com.google.gson.reflect.TypeToken<List<ContactResponse>>() {}.type
+            gson.fromJson(json, type)
+        } catch (e: Exception) { emptyList() }
+    }
+
+    fun getContacts(): List<Pair<String, String>> =
+        getContactCache().map { it.name to it.phone }
+
+    fun getLegacyContacts(): List<Pair<String, String>> {
+        val raw = prefs.getString("emergency_contacts", "") ?: return emptyList()
+        if(raw.isEmpty()) return emptyList()
+        return raw.split("|").mapNotNull {
             val parts = it.split(",")
-            if (parts.size == 2) Pair(parts[0], parts[1]) else null
+            if (parts.size == 2) parts[0] to parts[1] else null
         }
+    }
+
+    fun clearLegacyContacts() {
+        prefs.edit().remove("emergency_contacts").apply()
     }
 
     fun saveLockScreenSos(enabled: Boolean) {

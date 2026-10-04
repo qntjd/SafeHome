@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sh_bg">#0E1526</color>
+    <color name="sh_field">#152038</color>
+    <color name="sh_border">#5C6886</color>
+    <color name="sh_amber">#E8A33D</color>
+    <color name="sh_amber_light">#F6B955</color>
+    <color name="sh_teal">#1FC9A2</color>
+    <color name="sh_text">#F5F6FA</color>
+    <color name="sh_text_label">#C3C8D8</color>
+    <color name="sh_text_muted">#8B90A7</color>
+    <color name="sh_hint">#858CA5</color>
+    <color name="sh_error">#F87171</color>
+    <color name="sh_disabled">#2A3450</color>
+</resources>

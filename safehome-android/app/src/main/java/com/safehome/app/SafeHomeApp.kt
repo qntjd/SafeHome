@@ -5,9 +5,12 @@ import com.safehome.app.api.RetrofitClient
 import com.safehome.app.util.TokenManager
 import com.kakao.vectormap.KakaoMapSdk
 import android.content.pm.PackageManager
+import com.safehome.app.util.ContactRepository
+
 class SafeHomeApp : Application() {
 
     lateinit var tokenManager: TokenManager
+    val contactRepository by lazy { ContactRepository(tokenManager) }
 
     override fun onCreate() {
         super.onCreate()

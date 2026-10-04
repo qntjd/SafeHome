@@ -73,6 +73,8 @@ class HomeActivity : AppCompatActivity() {
         if (intent.getBooleanExtra("sos_triggered", false)) {
             showSosDialog()
         }
+
+        lifecycleScope.launch { (application as SafeHomeApp).contactRepository.refresh() }
     }
 
     private fun setupProfile() {

@@ -150,6 +150,7 @@ class MapActivity :  AppCompatActivity() {
 
                 map.setOnLabelClickListener { _, _, label ->
                     facilityIdByLabel[label]?.let { onFacilityMarkerClicked(it) }
+                    true
                 }
 
                 loadFacilities()
@@ -251,13 +252,11 @@ class MapActivity :  AppCompatActivity() {
     private fun onFacilityMarkerClicked(facilityId: String) {
         val facility = facilityById[facilityId] ?: return
 
-
-        if (facility.isActive == false) return
-
         val labelManager = kakaoMap?.labelManager ?: return
         val previousSelected = selectedFacilityId
         selectedFacilityId = if (previousSelected == facilityId) null else facilityId
 
+        android.util.Log.d("SafeHome", "districtName=${facility.districtName}, name=${facility.name}")
 
         if (previousSelected != null && previousSelected != facilityId) {
             facilityById[previousSelected]?.let { prevFacility ->
@@ -271,7 +270,6 @@ class MapActivity :  AppCompatActivity() {
             }
         }
 
-
         labelByFacilityId[facilityId]?.changeStyles(
             labelManager.addLabelStyles(
                 LabelStyles.from(
@@ -280,7 +278,12 @@ class MapActivity :  AppCompatActivity() {
             )
         )
 
-        // TODO: 여기서 하단 시설 정보 카드(주소, 타입 등)를 띄우는 로직 연결
+        FacilityInfoSheet.newInstance(
+            type = facility.type,
+            title = facility.name ?: facility.type,
+            address = facility.address ?: facility.districtName ?: "주소 정보 없음",
+            isActive = facility.isActive ?: true
+        ).show(supportFragmentManager, "facility_info")
     }
 
     private fun getFacilityIcon(type: String, state: MarkerState): android.graphics.Bitmap {

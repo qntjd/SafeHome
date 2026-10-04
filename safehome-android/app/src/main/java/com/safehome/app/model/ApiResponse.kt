@@ -54,6 +54,7 @@ data class FacilityResponse(
     val lng: Double,
     val name: String?,
     val districtName: String?,
+    val address: String?,
     val isActive: Boolean? = null
 )
 
@@ -151,4 +152,17 @@ data class SosLogResponse(
     val policeReported: Boolean,
     val createdAt: String,
     val recipients: List<SosRecipientResponse>
+)
+
+data class ContactResponse(
+    val id: String,
+    val name: String,
+    val phone: String,
+    val notifyAfterMin: Int?
+)
+
+data class ContactCreateRequest(
+    val name: String,
+    val phone: String,
+    val notifyAfterMin: Int? = null
 )

@@ -63,6 +63,7 @@
         <activity android:name=".ui.guide.NormalGuideActivity"/>
         <activity android:name=".ui.crime.CrimeStatsActivity"/>
         <activity android:name=".ui.sos.SosLogActivity"/>
+
         <activity
             android:name=".ui.LockScreenActivity"
             android:exported="false"

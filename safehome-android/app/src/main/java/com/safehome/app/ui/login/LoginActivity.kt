@@ -19,6 +19,9 @@ import com.safehome.app.databinding.ActivityLoginBinding
 import com.safehome.app.model.LoginRequest
 import com.safehome.app.ui.home.HomeActivity
 import kotlinx.coroutines.launch
+import android.text.InputType
+import android.view.inputmethod.EditorInfo
+import com.safehome.app.R
 
 class LoginActivity : AppCompatActivity() {
 
@@ -38,10 +41,37 @@ class LoginActivity : AppCompatActivity() {
         }
 
         credentialManager = CredentialManager.create(this)
+        // 비밀번호 보기/숨기기
+        var passwordVisible = false
+        binding.btnTogglePassword.setOnClickListener {
+            passwordVisible = !passwordVisible
+            val cursor = binding.etPassword.selectionEnd
+            val typeface = binding.etPassword.typeface
+            binding.etPassword.inputType = if (passwordVisible)
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            else
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            binding.etPassword.setSelection(cursor)
+            binding.etPassword.typeface = typeface
+            binding.btnTogglePassword.setImageResource(
+                if (passwordVisible) R.drawable.ic_eye_off else R.drawable.ic_eye
+            )
+            binding.btnTogglePassword.contentDescription = getString(
+                if (passwordVisible) R.string.login_hide_password else R.string.login_show_password
+            )
+        }
+
+        // 키보드의 '완료'로 바로 로그인
+        binding.etPassword.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                binding.btnLogin.performClick()
+                true
+            } else false
+        }
 
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
+            val password = binding.etPassword.text.toString()
             if (email.isEmpty() || password.isEmpty()) {
                 showError("이메일과 비밀번호를 입력해주세요.")
                 return@setOnClickListener

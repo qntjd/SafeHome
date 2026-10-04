@@ -15,6 +15,7 @@ import com.safehome.app.ui.home.HomeActivity
 import com.safehome.app.ui.login.LoginActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.graphics.drawable.Animatable
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
@@ -31,38 +32,49 @@ class SplashActivity : AppCompatActivity() {
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 )
-        showCircleAndLogo()
+        playLogoIntro()
     }
 
-    private fun showCircleAndLogo() {
-        // 원 드로잉 애니메이션
-        binding.ivCircleRing.visibility = View.VISIBLE
-        val circleDrawable = binding.ivCircleRing.drawable
-        if (circleDrawable is android.graphics.drawable.Animatable) {
-            circleDrawable.start()
-        }
-
+    private fun playLogoIntro() {
         lifecycleScope.launch {
-            delay(900)
 
-            // 로고 팝업
-            binding.ivLogo.visibility = View.VISIBLE
-            binding.ivLogo.scaleX = 0f
-            binding.ivLogo.scaleY = 0f
-            binding.ivLogo.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(500)
-                .setInterpolator(OvershootInterpolator(1.5f))
+            binding.ivFrame.visibility = View.VISIBLE
+            (binding.ivFrame.drawable as? Animatable)?.start()
+
+            delay(650)
+
+
+            binding.vBadge.animate()
+                .alpha(1f)
+                .setDuration(350)
                 .start()
 
-            delay(500)
+            delay(150)
 
-            // 앱 이름 슬라이드업
-            binding.tvAppName.visibility = View.VISIBLE
-            binding.tvAppName.alpha = 0f
-            binding.tvAppName.translationY = 40f
-            binding.tvAppName.animate()
+
+            binding.ivS.visibility = View.VISIBLE
+            (binding.ivS.drawable as? Animatable)?.start()
+
+            delay(850)
+
+
+            binding.vDot.visibility = View.VISIBLE
+            binding.vDot.scaleX = 0f
+            binding.vDot.scaleY = 0f
+            binding.vDot.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setInterpolator(OvershootInterpolator(3f))
+                .start()
+
+            delay(300)
+
+
+            binding.layoutAppName.visibility = View.VISIBLE
+            binding.layoutAppName.alpha = 0f
+            binding.layoutAppName.translationY = 40f
+            binding.layoutAppName.animate()
                 .alpha(1f)
                 .translationY(0f)
                 .setDuration(500)
@@ -70,7 +82,7 @@ class SplashActivity : AppCompatActivity() {
 
             delay(250)
 
-            // 슬로건 페이드인
+
             binding.tvSlogan.visibility = View.VISIBLE
             binding.tvSlogan.alpha = 0f
             binding.tvSlogan.animate()
@@ -78,9 +90,15 @@ class SplashActivity : AppCompatActivity() {
                 .setDuration(500)
                 .start()
 
-            delay(300)
+            binding.vUnderline.animate()
+                .scaleX(1f)
+                .setStartDelay(200)
+                .setDuration(400)
+                .start()
 
-            // 로딩 점 등장
+            delay(500)
+
+
             binding.layoutDots.visibility = View.VISIBLE
             binding.layoutDots.alpha = 0f
             binding.layoutDots.animate()
@@ -90,9 +108,8 @@ class SplashActivity : AppCompatActivity() {
 
             animateLoadingDots()
 
-            delay(1200)
+            delay(1000)
 
-            // 다음 화면으로
             navigateNext()
         }
     }

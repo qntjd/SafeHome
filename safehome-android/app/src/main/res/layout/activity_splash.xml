@@ -4,58 +4,97 @@
     android:layout_height="match_parent"
     android:background="#0E1526">
 
-
-    <!-- 콘텐츠 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center">
 
+
         <FrameLayout
             android:layout_width="160dp"
             android:layout_height="160dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="28dp">
+
+
+            <View
+                android:id="@+id/vBadge"
+                android:layout_width="147dp"
+                android:layout_height="147dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_splash_badge"
+                android:alpha="0" />
 
             <ImageView
-                android:id="@+id/ivCircleRing"
+                android:id="@+id/ivFrame"
                 android:layout_width="160dp"
                 android:layout_height="160dp"
-                android:src="@drawable/splash_circle_anim"
                 android:layout_gravity="center"
-                android:visibility="invisible"/>
+                android:src="@drawable/splash_frame_anim"
+                android:visibility="invisible" />
 
             <ImageView
-                android:id="@+id/ivLogo"
+                android:id="@+id/ivS"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@drawable/ic_safehome_logo"
-                android:scaleType="fitCenter"
                 android:layout_gravity="center"
-                android:visibility="invisible"/>
+                android:src="@drawable/splash_s_anim"
+                android:visibility="invisible" />
+
+            <View
+                android:id="@+id/vDot"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="108dp"
+                android:layout_marginTop="39dp"
+                android:background="@drawable/bg_dot_teal"
+                android:visibility="invisible" />
         </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvAppName"
+        <LinearLayout
+            android:id="@+id/layoutAppName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SafeHome"
-            android:textSize="36sp"
-            android:textColor="#F5F6FA"
-            android:textStyle="bold"
-            android:letterSpacing="0.05"
+            android:orientation="horizontal"
             android:layout_marginBottom="8dp"
-            android:visibility="invisible"/>
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Safe"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:textColor="#F5F6FA" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:textColor="#E8A33D" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSlogan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1인 가구 안심 생활 플랫폼"
+            android:text="1인 가구를 위한 안심 생활 플랫폼"
             android:textSize="14sp"
             android:textColor="#8B90A7"
-            android:layout_marginBottom="60dp"
-            android:visibility="invisible"/>
+            android:layout_marginBottom="12dp"
+            android:visibility="invisible" />
+
+
+        <View
+            android:id="@+id/vUnderline"
+            android:layout_width="40dp"
+            android:layout_height="3dp"
+            android:background="#E8A33D"
+            android:layout_marginBottom="48dp"
+            android:scaleX="0" />
 
         <LinearLayout
             android:id="@+id/layoutDots"
@@ -70,21 +109,21 @@
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_margin="4dp"
-                android:background="@drawable/bg_dot_amber"/>
+                android:background="@drawable/bg_dot_amber" />
 
             <View
                 android:id="@+id/dot2"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_margin="4dp"
-                android:background="@drawable/bg_dot_amber"/>
+                android:background="@drawable/bg_dot_amber" />
 
             <View
                 android:id="@+id/dot3"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_margin="4dp"
-                android:background="@drawable/bg_dot_amber"/>
+                android:background="@drawable/bg_dot_amber" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

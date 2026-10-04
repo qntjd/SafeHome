@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.lifecycle.lifecycleScope
 import com.safehome.app.SafeHomeApp
 import com.safehome.app.databinding.ActivitySettingsBinding
 import com.safehome.app.service.VoiceDetectionService
@@ -21,24 +22,20 @@ import com.safehome.app.ui.login.LoginActivity
 import com.safehome.app.util.LockScreenNotificationHelper
 import com.safehome.app.util.AudioRecordHelper
 import com.safehome.app.util.NightModeManager
+import kotlinx.coroutines.launch
+import com.safehome.app.model.ContactResponse
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private val tokenManager by lazy { (application as SafeHomeApp).tokenManager }
 
-    companion object {
-        val contacts = mutableListOf<Pair<String, String>>()
-    }
+    private val contactRepository by lazy { (application as SafeHomeApp).contactRepository }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // 저장된 연락처 불러오기
-        contacts.clear()
-        contacts.addAll(tokenManager.getContacts())
 
         setupProfile()
         setupContacts()
@@ -62,21 +59,27 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnAddContact.setOnClickListener {
             showAddContactDialog()
         }
-        refreshContactList()
+        refreshContactList(contactRepository.cached())
+        lifecycleScope.launch {
+            contactRepository.refresh()
+                .onSuccess { refreshContactList(it) }
+        }
     }
 
-    private fun refreshContactList() {
+    private fun toast(msg: String?) =
+        Toast.makeText(this, msg ?: "요청에 실패했어요", Toast.LENGTH_SHORT).show()
+    private fun refreshContactList(contacts: List<ContactResponse>) {
         binding.layoutContacts.removeAllViews()
-        contacts.forEachIndexed { index, (name, phone) ->
+        contacts.forEachIndexed { index, contact ->
             val view = LayoutInflater.from(this)
                 .inflate(android.R.layout.simple_list_item_2, binding.layoutContacts, false)
 
             val text1 = view.findViewById<TextView>(android.R.id.text1)
             val text2 = view.findViewById<TextView>(android.R.id.text2)
-            text1.text = name
+            text1.text = contact.name
             text1.setTextColor(0xFFF0F2F8.toInt())
             text1.textSize = 15f
-            text2.text = phone
+            text2.text = contact.phone
             text2.setTextColor(0xFF555A70.toInt())
             text2.textSize = 13f
             view.setPadding(48, 24, 48, 24)
@@ -85,11 +88,13 @@ class SettingsActivity : AppCompatActivity() {
             view.setOnLongClickListener {
                 AlertDialog.Builder(this)
                     .setTitle("연락처 삭제")
-                    .setMessage("${name}을 삭제할까요?")
+                    .setMessage("${contact.name}을 삭제할까요?")
                     .setPositiveButton("삭제") { _, _ ->
-                        contacts.removeAt(index)
-                        tokenManager.saveContacts(contacts)
-                        refreshContactList()
+                        lifecycleScope.launch {
+                            contactRepository.delete(contact.id)
+                                .onSuccess { refreshContactList(contactRepository.cached()) }
+                                .onFailure { toast(it.message) }
+                        }
                     }
                     .setNegativeButton("취소", null)
                     .show()
@@ -175,9 +180,11 @@ class SettingsActivity : AppCompatActivity() {
                         Toast.makeText(context, "올바른 휴대폰 번호 형식이 아니에요 (예: 01012345678)", Toast.LENGTH_SHORT).show()
                     }
                     else -> {
-                        contacts.add(Pair(name, phone))
-                        tokenManager.saveContacts(contacts)
-                        refreshContactList()
+                        lifecycleScope.launch {
+                            contactRepository.add(name, phone)
+                                .onSuccess { refreshContactList(contactRepository.cached()) }
+                                .onFailure { toast(it.message) }
+                        }
                     }
                 }
             }
