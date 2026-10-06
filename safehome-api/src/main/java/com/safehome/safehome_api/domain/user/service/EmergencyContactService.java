@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class EmergencyContactService {
                 .build();
         try {
             return EmergencyContactDto.ContactResponse.from(contactRepository.save(contact));
-        } catch (DataIntegerityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("이미 등록된 연락처입니다.");
         }
        
