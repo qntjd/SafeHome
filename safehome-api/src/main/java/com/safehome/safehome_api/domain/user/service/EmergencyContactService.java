@@ -50,7 +50,7 @@ public class EmergencyContactService {
                 .notifyAfterMin(req.notifyAfterMin() != null ? req.notifyAfterMin() : 10)
                 .build();
         try {
-            return EmergencyContactDto.ContactResponse.from(contactRepository.save(contact));
+            return EmergencyContactDto.ContactResponse.from(contactRepository.saveAndFlush(contact));
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("이미 등록된 연락처입니다.");
         }

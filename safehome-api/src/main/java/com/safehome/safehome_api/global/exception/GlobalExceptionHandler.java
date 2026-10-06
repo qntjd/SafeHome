@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<Void> handleException(Exception e) {
-        log.error("서버 오류 발생", e);  // ← 이 한 줄 추가
+        log.error("서버 오류 발생", e); 
         return ApiResponse.fail("서버 오류가 발생했습니다.");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiResponse<Void> handleDataIntegrity(DataIntegrityViolationException e) {
+        log.error("데이터 무결성 위반 발생: {}", e.getMostSpecificCause().getMessage());
+        return ApiResponse.fail("데이터 무결성 위반이 발생했습니다.");
     }
 }
