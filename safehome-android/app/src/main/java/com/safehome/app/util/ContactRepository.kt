@@ -7,15 +7,17 @@ import com.safehome.app.model.ContactCreateRequest
 import com.safehome.app.model.ContactResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ContactRepository(private val tokenManager: TokenManager) {
 
     private val api by lazy { RetrofitClient.create(ContactApi::class.java) }
+    private val migrationMutex = Mutex()
 
-    /** 캐시 (오프라인에서도 사용) */
+
     fun cached(): List<ContactResponse> = tokenManager.getContactCache()
 
-    /** 서버에서 받아 캐시 갱신. 실패하면 기존 캐시 유지 */
     suspend fun refresh(): Result<List<ContactResponse>> = withContext(Dispatchers.IO) {
         try {
             migrateLegacyIfNeeded()
@@ -62,22 +64,22 @@ class ContactRepository(private val tokenManager: TokenManager) {
     }
 
     /** 기존 휴대폰 저장 연락처를 서버로 한 번 옮김 */
-    private suspend fun migrateLegacyIfNeeded() {
+    private suspend fun migrateLegacyIfNeeded() = migrationMutex.withLock {
         val legacy = tokenManager.getLegacyContacts()
-        if (legacy.isEmpty()) return
+        if (legacy.isEmpty()) return@withLock
 
-        var allOk = true
-        legacy.forEach { (name, phone) ->
-            try {
+        val serverPhones = api.getContacts().body()?.data
+            ?.map { it.phone }?.toMutableSet()
+            ?: return@withLock
+
+        legacy.distinctBy { it.second }.forEach { (name, phone) ->
+            if (phone !in serverPhones) {
                 val res = api.addContact(ContactCreateRequest(name, phone))
-                // 이미 등록된 번호(중복)는 성공으로 간주
-                if (!res.isSuccessful && res.code() != 400 && res.code() != 409) allOk = false
-            } catch (e: Exception) {
-                allOk = false
+                if (res.isSuccessful) serverPhones += phone
             }
         }
-        // 네트워크 실패 시 다음에 다시 시도하도록 남겨둠
-        if (allOk) tokenManager.clearLegacyContacts()
+        
+        tokenManager.clearLegacyContacts()
     }
 
     private fun errorMessage(body: String?): String =
