@@ -48,8 +48,12 @@ public class EmergencyContactService {
                 .phone(req.phone())
                 .notifyAfterMin(req.notifyAfterMin() != null ? req.notifyAfterMin() : 10)
                 .build();
-
-        return EmergencyContactDto.ContactResponse.from(contactRepository.save(contact));
+        try {
+            return EmergencyContactDto.ContactResponse.from(contactRepository.save(contact));
+        } catch (DataIntegerityViolationException e) {
+            throw new IllegalArgumentException("이미 등록된 연락처입니다.");
+        }
+       
     }
 
     @Transactional

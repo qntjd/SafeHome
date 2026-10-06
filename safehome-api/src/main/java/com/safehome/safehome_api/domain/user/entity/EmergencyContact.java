@@ -6,7 +6,12 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "emergency_contacts")
+@Table(name = "emergency_contacts",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_contact_user_phone",
+                columnNames = {"user_id", "phone"}
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -28,5 +33,5 @@ public class EmergencyContact {
     private String phone;
 
     @Builder.Default
-    private Integer notifyAfterMin = 10; // 미도착 시 알림까지 대기 시간(분)
+    private Integer notifyAfterMin = 10; 
 }
